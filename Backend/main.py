@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from Database_Handler import Database
 app = Flask(__name__)
-db = Database()
+#db = Database()
 
 @app.route('/login', methods=["POST", "GET"])
 def login():
@@ -9,7 +9,8 @@ def login():
         data = request.get_json()
         email = data["email"]
         password = data["password"]
-        db.login(email, password)
+        #db.login(email, password)
+        return "Code: 200"
     else:
         return "Code: 400"
 
