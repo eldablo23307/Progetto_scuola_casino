@@ -10,9 +10,8 @@ Il sito web comunicherà con il server tramite API, fornita da quest'ultimo.
 - MySQL
 - Python
 - Flask
-- HTML
-- CSS
-- Jinjia
+- Flutter
+- Dart
 
 ### Schema Database
 Utente(<u>ID_Giocatore</u>, Nome, Cognome, Email, Password, Profile_Picture, FK_Fidalty, Fk_Balance, FK_Prefered_Game)  
@@ -20,3 +19,6 @@ Bonus(<u>ID_Bonus</u>, Punti, Tipo_Bonus)
 Account_Balance(<u>ID_Balance</u>, Crypto_Address, Current_Balance, Account_Type, FK_Movimento)  
 Movimenti(<u>ID_Movimenti</u>, Data, Tipo_Movimento, Importo)  
 Giochi(<u>ID_Giochi</u>, Nome, Categoria)  
+
+## Frontend
+## Backend
