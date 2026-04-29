@@ -1,11 +1,15 @@
-from flask import Flask, request 
-
+from flask import Flask, request, jsonify
+from Database_Handler import Database
 app = Flask(__name__)
+db = Database()
 
 @app.route('/login', methods=["POST", "GET"])
 def login():
     if request.method == "POST":
-        return "Code: 100"
+        data = request.get_json()
+        email = data["email"]
+        password = data["password"]
+        db.login(email, password)
     else:
         return "Code: 400"
 
