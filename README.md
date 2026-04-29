@@ -21,4 +21,5 @@ Movimenti(<u>ID_Movimenti</u>, Data, Tipo_Movimento, Importo)
 Giochi(<u>ID_Giochi</u>, Nome, Categoria)  
 
 ## Frontend
+Il frontend è realizzato tramite flutter per permettere all'utente da utilizzare qualsiasi piattaforma che vuole per accedere al sito
 ## Backend
