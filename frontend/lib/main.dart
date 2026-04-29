@@ -3,15 +3,30 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 void main() {
-    runApp(const Login());
+    runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget{
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: "Brawls Bets",
+      initialRoute: "/",
+      routes: {
+        "/": (context) => const Login(),
+        "/MainApp": (context) => MainApp(),
+      },
+    );
+  }
 }
 //Login Page
 class Login extends StatelessWidget {
     const Login({super.key});
     @override
     Widget build(BuildContext context ) {
-        return MaterialApp(	
-			home: Scaffold(
+        return Scaffold(
 				backgroundColor: Color(0xFF593F62),	
 				body: const Center(
 						child: Column(
@@ -22,9 +37,7 @@ class Login extends StatelessWidget {
 							],
 						),
 					),
-				),
-			
-		);
+				);
     }
 }
 //Login Form Widget
@@ -101,6 +114,9 @@ class _LoginFormState extends State<LoginForm> {
                                 final response = await sendData(
                                     emailController.text,
                                     passwordController.text);
+                                if (response.statusCode == 200) {
+                                  Navigator.of(context).pushNamed('/MainApp');
+                                }
                                 },
                             child: Text("Login",
                                 style: TextStyle(color: Color(0XFFA5C4D4)),
@@ -110,5 +126,23 @@ class _LoginFormState extends State<LoginForm> {
                 ),
             ],
         );
+    }
+}
+
+
+class MainApp extends StatelessWidget {
+    const MainApp({super.key});
+
+    @override
+    Widget build(BuildContext context){
+      return Scaffold(
+        backgroundColor: Color(0xFF593F62),
+        appBar: AppBar(
+          title: const Text("Brawls Bets")
+        ),
+        body: Center(
+
+        ),
+      );
     }
 }

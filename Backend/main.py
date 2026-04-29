@@ -1,7 +1,9 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
+from flask_cors import CORS
 from Database_Handler import Database
 app = Flask(__name__)
-#db = Database()
+CORS(app)
+db = Database()
 
 @app.route('/login', methods=["POST", "GET"])
 def login():
@@ -9,10 +11,11 @@ def login():
         data = request.get_json()
         email = data["email"]
         password = data["password"]
-        #db.login(email, password)
-        return "Code: 200"
+        db.login(email, password)
+        return "Logged Succesfully"
     else:
-        return "Code: 400"
+        abort(401)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
