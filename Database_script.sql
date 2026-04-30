@@ -1,22 +1,22 @@
 CREATE DATABASE Casino;
-
+USE Casino;
 CREATE TABLE Giochi (
 	ID_Gioco int PRIMARY KEY AUTO_INCREMENT,
 	Nome varchar(255) NOT NULL,
-	Categoria varchar(255) NOT NULL,
+	Categoria varchar(255) NOT NULL
 );
 
 CREATE TABLE Movimenti (
 	ID_Movimento int PRIMARY KEY AUTO_INCREMENT,
 	Data date NOT NULL,
 	Tipo_Movimento varchar(255) NOT NULL,
-	Importo float NOT NULL,
+	Importo float NOT NULL
 );
 
 CREATE TABLE Bonus (
 	ID_Bonus int PRIMARY KEY AUTO_INCREMENT,
 	Punti int NOT NULL,
-	Tipo_Bonus varchar(255) NOT NULL,
+	Tipo_Bonus varchar(255) NOT NULL
 );
 
 CREATE TABLE Account_Balance (
@@ -34,7 +34,7 @@ CREATE TABLE Utente (
 	Cognome varchar(255) NOT NULL,
 	Email varchar(255) NOT NULL,
 	Password varchar(255) NOT NULL,
-	Profile_Picture varbinary(max),
+	Profile_Picture varchar(255),
 	FK_fidalty int,
 	FK_Balance int NOT NULL,
 	FK_Prefered_Game int,
