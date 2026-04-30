@@ -1,0 +1,37 @@
+from flask import Flask, request, jsonify, abort
+from flask_cors import CORS
+from Database_Handler import Database
+app = Flask(__name__)
+CORS(app)
+db = Database()
+
+@app.route('/login', methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+        data = request.get_json()
+        email = data["email"]
+        password = data["password"]
+        print(email, password)
+        if (db.login(email, password)):
+            return "Logged Succesfully"
+        else:
+            abort(500)
+    else:
+        abort(501)
+
+@app.route("/register", methods=["POST", "GET"])
+def register():
+    if request.method == "POST":
+        data = request.get_json()
+        name = data["nome"]
+        surname = data["cognome"]
+        email = data["email"]
+        password = data["password"]
+        if(db.register(name, surname, email, password)):
+            return "Register Succesfully"
+        else:
+            abort(500)
+    else:
+        abort(501)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0")
