@@ -23,8 +23,8 @@ def login():
 def register():
     if request.method == "POST":
         data = request.get_json()
-        name = data["nome"]
-        surname = data["cognome"]
+        name = data["name"]
+        surname = data["surname"]
         email = data["email"]
         password = data["password"]
         account_type = data["account_type"]
@@ -32,6 +32,7 @@ def register():
         if(db.register(name, surname, email, password, account_type, address)):
             return "Register Succesfully"
         else:
+            print("Errore nella registrazione")
             abort(500)
     else:
         abort(501)
