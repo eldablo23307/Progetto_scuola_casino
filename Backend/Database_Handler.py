@@ -66,6 +66,53 @@ class Database():
         )
         return self.cursor.fetchone()
 
+
+    def get_balance(self, id_giocatore: int):
+        self.cursor.execute(
+            """
+            SELECT
+                Account_Balance.ID_Balance AS id_balance,
+                Account_Balance.Current_Balance AS bilancio
+            FROM Utente
+            INNER JOIN Account_Balance ON Utente.FK_Balance = Account_Balance.ID_Balance
+            WHERE Utente.ID_Giocatore = %s
+            LIMIT 1
+            """,
+            (id_giocatore,),
+        )
+        return self.cursor.fetchone()
+
+    def play_game(self, id_giocatore: int, bet: float, game_callback):
+        if bet <= 0:
+            raise ValueError("La puntata deve essere maggiore di zero")
+
+        try:
+            balance = self.get_balance(id_giocatore)
+            if balance is None:
+                raise LookupError("Giocatore non trovato")
+
+            current_balance = float(balance["bilancio"])
+            if current_balance < bet:
+                raise ValueError("Saldo insufficiente")
+
+            outcome = game_callback(float(bet))
+            new_balance = current_balance - float(bet) + float(outcome["payout"])
+
+            self.cursor.execute(
+                """
+                UPDATE Account_Balance
+                SET Current_Balance = %s
+                WHERE ID_Balance = %s
+                """,
+                (new_balance, balance["id_balance"]),
+            )
+            self.db.commit()
+            outcome["balance"] = round(new_balance, 2)
+            return outcome
+        except Exception:
+            self.db.rollback()
+            raise
+
     def get_slot(self):
         self.cursor.execute("SELECT Nome, Categoria FROM Giochi")
         return self.cursor.fetchall()

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -14,13 +15,31 @@ const List<GameDefinition> casinoGames = [
     subtitle: 'Punta sul colore vincente',
     icon: Icons.radar_rounded,
     visual: GameVisual.roulette,
+    apiPath: '/games/roulette/play',
+    imageUrl: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=900&q=80',
+    choices: [
+      GameChoice(label: 'Rosso', value: 'red'),
+      GameChoice(label: 'Nero', value: 'black'),
+      GameChoice(label: 'Verde', value: 'green'),
+    ],
     colors: [Color(0xFFE53935), Color(0xFF111827)],
   ),
   GameDefinition(
     title: 'Ice Fishing',
-    subtitle: 'Pesca bonus sotto il ghiaccio',
+    subtitle: 'Ruota, bonus e pesca sotto il ghiaccio',
     icon: Icons.ac_unit_rounded,
     visual: GameVisual.iceFishing,
+    apiPath: '/games/ice-fishing/play',
+    imageUrl: 'https://images.unsplash.com/photo-1517783999520-f068d7431a60?auto=format&fit=crop&w=900&q=80',
+    choices: [
+      GameChoice(label: '1x', value: '1x'),
+      GameChoice(label: '2x', value: '2x'),
+      GameChoice(label: '5x', value: '5x'),
+      GameChoice(label: '10x', value: '10x'),
+      GameChoice(label: 'Coin Flip', value: 'coin_flip'),
+      GameChoice(label: 'Pachinko', value: 'pachinko'),
+      GameChoice(label: 'Ice Bonus', value: 'ice_bonus'),
+    ],
     colors: [Color(0xFF67E8F9), Color(0xFF1D4ED8)],
   ),
   GameDefinition(
@@ -28,6 +47,8 @@ const List<GameDefinition> casinoGames = [
     subtitle: 'Ciliegie, limoni e jackpot',
     icon: Icons.local_pizza_rounded,
     visual: GameVisual.fruitSlot,
+    apiPath: '/games/slots/fruit/play',
+    imageUrl: 'https://images.unsplash.com/photo-1576804845416-d8565f0601c9?auto=format&fit=crop&w=900&q=80',
     colors: [Color(0xFFFF6B6B), Color(0xFFFFC857)],
   ),
   GameDefinition(
@@ -35,6 +56,8 @@ const List<GameDefinition> casinoGames = [
     subtitle: 'Gemme rare e moltiplicatori',
     icon: Icons.diamond_rounded,
     visual: GameVisual.crystalSlot,
+    apiPath: '/games/slots/crystal/play',
+    imageUrl: 'https://images.unsplash.com/photo-1519638399535-1b036603ac77?auto=format&fit=crop&w=900&q=80',
     colors: [Color(0xFF7C3AED), Color(0xFF22D3EE)],
   ),
   GameDefinition(
@@ -42,11 +65,20 @@ const List<GameDefinition> casinoGames = [
     subtitle: 'Giri turbo ad alta tensione',
     icon: Icons.bolt_rounded,
     visual: GameVisual.thunderSlot,
+    apiPath: '/games/slots/thunder/play',
+    imageUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80',
     colors: [Color(0xFF111827), Color(0xFFFACC15)],
   ),
 ];
 
 enum GameVisual { roulette, iceFishing, fruitSlot, crystalSlot, thunderSlot }
+
+class GameChoice {
+  const GameChoice({required this.label, required this.value});
+
+  final String label;
+  final String value;
+}
 
 class GameDefinition {
   const GameDefinition({
@@ -54,14 +86,22 @@ class GameDefinition {
     required this.subtitle,
     required this.icon,
     required this.visual,
+    required this.apiPath,
+    required this.imageUrl,
     required this.colors,
+    this.choices = const [],
   });
 
   final String title;
   final String subtitle;
   final IconData icon;
   final GameVisual visual;
+  final String apiPath;
+  final String imageUrl;
   final List<Color> colors;
+  final List<GameChoice> choices;
+
+  bool get needsChoice => choices.isNotEmpty;
 }
 
 void main() {
@@ -84,6 +124,14 @@ class UserSession {
       playerId: (json['id_giocatore'] as num).toInt(),
       name: json['nome'] as String,
       balance: (json['bilancio'] as num).toDouble(),
+    );
+  }
+
+  UserSession copyWith({double? balance}) {
+    return UserSession(
+      playerId: playerId,
+      name: name,
+      balance: balance ?? this.balance,
     );
   }
 }
@@ -585,10 +633,13 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   late Future<UserSession> userFuture;
   UserSession? initialSession;
+  bool hasLoadedArguments = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (hasLoadedArguments) return;
+    hasLoadedArguments = true;
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is UserSession) {
       initialSession = args;
@@ -596,6 +647,13 @@ class _MainAppState extends State<MainApp> {
     } else {
       userFuture = Future<UserSession>.error('Utente non trovato');
     }
+  }
+
+  void updateSession(UserSession session) {
+    setState(() {
+      initialSession = session;
+      userFuture = Future<UserSession>.value(session);
+    });
   }
 
   Future<UserSession> fetchUser(int playerId) async {
@@ -674,7 +732,7 @@ class _MainAppState extends State<MainApp> {
                         child: Center(child: CircularProgressIndicator()),
                       )
                     else
-                      Expanded(child: Dashboard(session: session)),
+                      Expanded(child: Dashboard(session: session, onSessionChanged: updateSession)),
                   ],
                 ),
               );
@@ -687,9 +745,10 @@ class _MainAppState extends State<MainApp> {
 }
 
 class Dashboard extends StatelessWidget {
-  const Dashboard({required this.session, super.key});
+  const Dashboard({required this.session, required this.onSessionChanged, super.key});
 
   final UserSession session;
+  final ValueChanged<UserSession> onSessionChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -768,7 +827,7 @@ class Dashboard extends StatelessWidget {
               mainAxisSpacing: 16,
               childAspectRatio: 1.12,
             ),
-            itemBuilder: (context, index) => GameCard(game: casinoGames[index]),
+            itemBuilder: (context, index) => GameCard(game: casinoGames[index], session: session, onSessionChanged: onSessionChanged),
           ),
         ),
       ],
@@ -880,13 +939,28 @@ class BrandLogo extends StatelessWidget {
 }
 
 class GameCard extends StatelessWidget {
-  const GameCard({required this.game, super.key});
+  const GameCard({required this.game, required this.session, required this.onSessionChanged, super.key});
 
   final GameDefinition game;
+  final UserSession session;
+  final ValueChanged<UserSession> onSessionChanged;
+
+  Future<void> openGame(BuildContext context) async {
+    final updatedSession = await Navigator.of(context).push<UserSession>(
+      MaterialPageRoute(
+        builder: (_) => GamePlayPage(game: game, session: session),
+      ),
+    );
+    if (updatedSession != null) {
+      onSessionChanged(updatedSession);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: () => openGame(context),
+      child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
         gradient: LinearGradient(
@@ -911,6 +985,28 @@ class GameCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         child: Stack(
           children: [
+            Positioned.fill(
+              child: Image.network(
+                game.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => GameArtwork(game: game),
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      primary.withValues(alpha: 0.18),
+                      game.colors.last.withValues(alpha: 0.42),
+                      primary.withValues(alpha: 0.78),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             Positioned.fill(child: GameArtwork(game: game)),
             Positioned(
               left: 18,
@@ -949,6 +1045,873 @@ class GameCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    ),
+    );
+  }
+}
+
+
+class GameOutcome {
+  const GameOutcome({
+    required this.game,
+    required this.bet,
+    required this.payout,
+    required this.profit,
+    required this.balance,
+    required this.message,
+    required this.result,
+  });
+
+  final String game;
+  final double bet;
+  final double payout;
+  final double profit;
+  final double balance;
+  final String message;
+  final Map<String, dynamic> result;
+
+  factory GameOutcome.fromJson(Map<String, dynamic> json) {
+    return GameOutcome(
+      game: json['game'] as String,
+      bet: (json['bet'] as num).toDouble(),
+      payout: (json['payout'] as num).toDouble(),
+      profit: (json['profit'] as num).toDouble(),
+      balance: (json['balance'] as num).toDouble(),
+      message: json['message'] as String,
+      result: (json['result'] as Map<String, dynamic>?) ?? {},
+    );
+  }
+}
+
+class GamePlayPage extends StatefulWidget {
+  const GamePlayPage({required this.game, required this.session, super.key});
+
+  final GameDefinition game;
+  final UserSession session;
+
+  @override
+  State<GamePlayPage> createState() => _GamePlayPageState();
+}
+
+class _GamePlayPageState extends State<GamePlayPage> with SingleTickerProviderStateMixin {
+  final TextEditingController betController = TextEditingController(text: '50');
+  late UserSession session;
+  String? selectedChoice;
+  bool isPlaying = false;
+  String? errorMessage;
+  GameOutcome? outcome;
+  late final AnimationController playAnimationController;
+
+  @override
+  void initState() {
+    super.initState();
+    playAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    );
+    session = widget.session;
+    if (widget.game.choices.isNotEmpty) {
+      selectedChoice = widget.game.choices.first.value;
+    }
+  }
+
+  @override
+  void dispose() {
+    playAnimationController.dispose();
+    betController.dispose();
+    super.dispose();
+  }
+
+  Future<void> play() async {
+    final bet = double.tryParse(betController.text.replaceAll(',', '.'));
+    if (bet == null || bet <= 0) {
+      setState(() => errorMessage = 'Inserisci una puntata valida.');
+      return;
+    }
+
+    setState(() {
+      isPlaying = true;
+      errorMessage = null;
+      outcome = null;
+    });
+    playAnimationController.repeat();
+
+    try {
+      final body = <String, Object>{
+        'id_giocatore': session.playerId,
+        'bet': bet,
+        if (widget.game.needsChoice) 'choice': selectedChoice ?? '',
+      };
+      final response = await http.post(
+        Uri.parse('$apiBaseUrl${widget.game.apiPath}'),
+        headers: const {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Giocata non riuscita');
+      }
+
+      final played = GameOutcome.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+      setState(() {
+        outcome = played;
+        session = session.copyWith(balance: played.balance);
+      });
+    } catch (_) {
+      setState(() {
+        errorMessage = 'Giocata non riuscita: controlla saldo, puntata e backend.';
+      });
+    } finally {
+      playAnimationController.stop();
+      if (mounted) {
+        playAnimationController.forward(from: 0);
+        setState(() => isPlaying = false);
+      }
+    }
+  }
+
+  void closeWithSession() {
+    Navigator.of(context).pop(session);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) closeWithSession();
+      },
+      child: Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [primary, widget.game.colors.last.withValues(alpha: 0.74)],
+            ),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      IconButton.filledTonal(
+                        onPressed: closeWithSession,
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          widget.game.title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide = constraints.maxWidth > 860;
+                      final gamePanel = GameHeroPanel(
+                        game: widget.game,
+                        outcome: outcome,
+                        isPlaying: isPlaying,
+                        animation: playAnimationController,
+                      );
+                      final controls = GameControls(
+                        game: widget.game,
+                        session: session,
+                        betController: betController,
+                        selectedChoice: selectedChoice,
+                        outcome: outcome,
+                        errorMessage: errorMessage,
+                        isPlaying: isPlaying,
+                        onChoiceSelected: (choice) => setState(() => selectedChoice = choice),
+                        onPlay: play,
+                      );
+
+                      if (isWide) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(flex: 6, child: gamePanel),
+                            const SizedBox(width: 22),
+                            Expanded(flex: 4, child: controls),
+                          ],
+                        );
+                      }
+
+                      return Column(
+                        children: [
+                          gamePanel,
+                          const SizedBox(height: 18),
+                          controls,
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class GameHeroPanel extends StatelessWidget {
+  const GameHeroPanel({
+    required this.game,
+    required this.outcome,
+    required this.isPlaying,
+    required this.animation,
+    super.key,
+  });
+
+  final GameDefinition game;
+  final GameOutcome? outcome;
+  final bool isPlaying;
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 520,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(34),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+        boxShadow: [BoxShadow(color: game.colors.first.withValues(alpha: 0.22), blurRadius: 36)],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(34),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.network(
+                game.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => GameArtwork(game: game),
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.black.withValues(alpha: 0.18), primary.withValues(alpha: 0.9)],
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: AnimatedGameStage(
+                game: game,
+                outcome: outcome,
+                isPlaying: isPlaying,
+                animation: animation,
+              ),
+            ),
+            if (game.visual == GameVisual.iceFishing)
+              Positioned(
+                right: 26,
+                top: 28,
+                child: IceWheel(
+                  outcome: outcome,
+                  isPlaying: isPlaying,
+                  animation: animation,
+                ),
+              ),
+            Positioned(
+              left: 28,
+              right: 28,
+              bottom: 28,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    game.subtitle,
+                    style: TextStyle(color: accent.withValues(alpha: 0.86), fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    outcome?.message ?? 'Scegli la puntata e premi Gioca.',
+                    style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class GameControls extends StatelessWidget {
+  const GameControls({
+    required this.game,
+    required this.session,
+    required this.betController,
+    required this.selectedChoice,
+    required this.outcome,
+    required this.errorMessage,
+    required this.isPlaying,
+    required this.onChoiceSelected,
+    required this.onPlay,
+    super.key,
+  });
+
+  final GameDefinition game;
+  final UserSession session;
+  final TextEditingController betController;
+  final String? selectedChoice;
+  final GameOutcome? outcome;
+  final String? errorMessage;
+  final bool isPlaying;
+  final ValueChanged<String> onChoiceSelected;
+  final VoidCallback onPlay;
+
+  @override
+  Widget build(BuildContext context) {
+    return AuthCard(
+      children: [
+        InfoPill(
+          icon: Icons.account_balance_wallet_rounded,
+          label: 'Saldo attuale',
+          value: '${session.balance.toStringAsFixed(2)} crediti',
+        ),
+        const SizedBox(height: 18),
+        StyledTextField(
+          controller: betController,
+          hintText: 'Puntata',
+          icon: Icons.paid_outlined,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        ),
+        if (game.choices.isNotEmpty) ...[
+          const SizedBox(height: 18),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              game.visual == GameVisual.iceFishing ? 'Punta sul settore della ruota' : 'Scegli una giocata',
+              style: TextStyle(color: accent.withValues(alpha: 0.82), fontWeight: FontWeight.w700),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: game.choices.map((choice) {
+              final selected = choice.value == selectedChoice;
+              return ChoiceChip(
+                selected: selected,
+                label: Text(choice.label),
+                selectedColor: gold,
+                labelStyle: TextStyle(color: selected ? primary : Colors.white, fontWeight: FontWeight.w800),
+                onSelected: (_) => onChoiceSelected(choice.value),
+              );
+            }).toList(),
+          ),
+        ],
+        const SizedBox(height: 22),
+        PrimaryButton(label: 'Gioca', isLoading: isPlaying, onPressed: onPlay),
+        if (errorMessage != null) ...[
+          const SizedBox(height: 14),
+          Text(errorMessage!, style: const TextStyle(color: Colors.redAccent)),
+        ],
+        if (outcome != null) ...[
+          const SizedBox(height: 20),
+          OutcomeCard(outcome: outcome!),
+        ],
+      ],
+    );
+  }
+}
+
+class OutcomeCard extends StatelessWidget {
+  const OutcomeCard({required this.outcome, super.key});
+
+  final GameOutcome outcome;
+
+  @override
+  Widget build(BuildContext context) {
+    final positive = outcome.profit >= 0;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: 0.56),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: (positive ? gold : Colors.redAccent).withValues(alpha: 0.42)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(outcome.message, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              MiniStat(label: 'Puntata', value: outcome.bet.toStringAsFixed(2)),
+              MiniStat(label: 'Vincita', value: outcome.payout.toStringAsFixed(2)),
+              MiniStat(label: 'Profitto', value: outcome.profit.toStringAsFixed(2), highlight: positive),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(_details(outcome.result), style: TextStyle(color: accent.withValues(alpha: 0.82))),
+        ],
+      ),
+    );
+  }
+
+  String _details(Map<String, dynamic> result) {
+    if (result.containsKey('reels')) {
+      return "Rulli: ${(result['reels'] as List).join('  ')}";
+    }
+    if (result.containsKey('number')) {
+      return "Numero: ${result['number']} - Colore: ${result['color']}";
+    }
+    if (result.containsKey('segmentLabel')) {
+      final bonus = result['bonus'] as Map<String, dynamic>?;
+      return bonus == null
+          ? "Settore: ${result['segmentLabel']} - Moltiplicatore: ${result['multiplier']}x"
+          : "Settore: ${result['segmentLabel']} - ${bonus['label']} (${bonus['multiplier']}x)";
+    }
+    return 'Risultato registrato.';
+  }
+}
+
+class MiniStat extends StatelessWidget {
+  const MiniStat({required this.label, required this.value, this.highlight = false, super.key});
+
+  final String label;
+  final String value;
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(color: accent.withValues(alpha: 0.72), fontSize: 12)),
+          Text(value, style: TextStyle(color: highlight ? gold : Colors.white, fontWeight: FontWeight.w900)),
+        ],
+      ),
+    );
+  }
+}
+
+class IceWheel extends StatelessWidget {
+  const IceWheel({
+    required this.outcome,
+    required this.isPlaying,
+    required this.animation,
+    super.key,
+  });
+
+  final GameOutcome? outcome;
+  final bool isPlaying;
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    final segment = outcome?.result['segment'] as String?;
+    return SizedBox(
+      width: 210,
+      height: 210,
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (context, child) {
+          final turns = isPlaying ? animation.value * math.pi * 10 : animation.value * math.pi * 2;
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              Transform.rotate(
+                angle: turns,
+                child: CustomPaint(size: const Size.square(210), painter: IceWheelPainter(segment)),
+              ),
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: primary.withValues(alpha: 0.9),
+                  border: Border.all(color: gold, width: 3),
+                ),
+                child: const Icon(Icons.ac_unit_rounded, color: gold, size: 34),
+              ),
+              const Positioned(top: 0, child: Icon(Icons.arrow_drop_down_rounded, color: gold, size: 44)),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class IceWheelPainter extends CustomPainter {
+  IceWheelPainter(this.selectedSegment);
+
+  final String? selectedSegment;
+  final List<String> labels = const ['1x', '2x', '5x', '10x', 'Flip', 'Pach', 'Bonus'];
+  final List<String> keys = const ['1x', '2x', '5x', '10x', 'coin_flip', 'pachinko', 'ice_bonus'];
+  final List<Color> colors = const [
+    Color(0xFFBAE6FD),
+    Color(0xFF38BDF8),
+    Color(0xFF2563EB),
+    Color(0xFF1E3A8A),
+    Color(0xFFFACC15),
+    Color(0xFFA78BFA),
+    Color(0xFFF472B6),
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final sweep = math.pi * 2 / labels.length;
+    final textPainter = TextPainter(textDirection: TextDirection.ltr, textAlign: TextAlign.center);
+
+    for (var i = 0; i < labels.length; i++) {
+      final paint = Paint()..color = colors[i].withValues(alpha: keys[i] == selectedSegment ? 1 : 0.86);
+      canvas.drawArc(rect, -math.pi / 2 + (i * sweep), sweep, true, paint);
+      final labelAngle = -math.pi / 2 + (i * sweep) + sweep / 2;
+      final labelOffset = Offset(center.dx + math.cos(labelAngle) * radius * 0.66, center.dy + math.sin(labelAngle) * radius * 0.66);
+      textPainter.text = TextSpan(text: labels[i], style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900));
+      textPainter.layout();
+      textPainter.paint(canvas, labelOffset - Offset(textPainter.width / 2, textPainter.height / 2));
+    }
+
+    canvas.drawCircle(center, radius - 2, Paint()..style = PaintingStyle.stroke..strokeWidth = 4..color = Colors.white.withValues(alpha: 0.76));
+  }
+
+  @override
+  bool shouldRepaint(covariant IceWheelPainter oldDelegate) => oldDelegate.selectedSegment != selectedSegment;
+}
+
+
+class AnimatedGameStage extends StatelessWidget {
+  const AnimatedGameStage({
+    required this.game,
+    required this.outcome,
+    required this.isPlaying,
+    required this.animation,
+    super.key,
+  });
+
+  final GameDefinition game;
+  final GameOutcome? outcome;
+  final bool isPlaying;
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (game.visual) {
+      case GameVisual.roulette:
+        return AnimatedRouletteStage(
+          game: game,
+          outcome: outcome,
+          isPlaying: isPlaying,
+          animation: animation,
+        );
+      case GameVisual.iceFishing:
+        return AnimatedIceFishingStage(
+          game: game,
+          isPlaying: isPlaying,
+          animation: animation,
+        );
+      case GameVisual.fruitSlot:
+      case GameVisual.crystalSlot:
+      case GameVisual.thunderSlot:
+        return AnimatedSlotStage(
+          game: game,
+          outcome: outcome,
+          isPlaying: isPlaying,
+          animation: animation,
+        );
+    }
+  }
+}
+
+class AnimatedRouletteStage extends StatelessWidget {
+  const AnimatedRouletteStage({
+    required this.game,
+    required this.outcome,
+    required this.isPlaying,
+    required this.animation,
+    super.key,
+  });
+
+  final GameDefinition game;
+  final GameOutcome? outcome;
+  final bool isPlaying;
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final progress = animation.value;
+        final ballAngle = (progress * math.pi * (isPlaying ? 16 : 2)) - math.pi / 2;
+        final ballRadius = isPlaying ? 96.0 : 76.0;
+        return Stack(
+          children: [
+            Positioned.fill(child: GameArtwork(game: game)),
+            Positioned(
+              right: 18,
+              top: 18,
+              child: Transform.rotate(
+                angle: progress * math.pi * (isPlaying ? 14 : 2),
+                child: Container(
+                  width: 230,
+                  height: 230,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: gold.withValues(alpha: 0.92), width: 8),
+                    gradient: SweepGradient(
+                      colors: [
+                        Colors.redAccent,
+                        Colors.black87,
+                        Colors.redAccent,
+                        Colors.black87,
+                        const Color(0xFF16A34A),
+                        Colors.redAccent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 18 + 115 + (math.cos(ballAngle) * ballRadius) - 8,
+              top: 18 + 115 + (math.sin(ballAngle) * ballRadius) - 8,
+              child: Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.9), blurRadius: 14)],
+                ),
+              ),
+            ),
+            if (outcome != null)
+              Positioned(
+                right: 92,
+                top: 94,
+                child: ResultBadge(text: '${outcome!.result['number']}'),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class AnimatedIceFishingStage extends StatelessWidget {
+  const AnimatedIceFishingStage({
+    required this.game,
+    required this.isPlaying,
+    required this.animation,
+    super.key,
+  });
+
+  final GameDefinition game;
+  final bool isPlaying;
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final bob = math.sin(animation.value * math.pi * 2) * (isPlaying ? 16 : 5);
+        return Stack(
+          children: [
+            Positioned.fill(child: GameArtwork(game: game)),
+            for (var i = 0; i < 18; i++)
+              Positioned(
+                left: 18.0 + (i * 43 % 340),
+                top: ((animation.value * 180) + i * 31) % 520,
+                child: Icon(Icons.ac_unit_rounded, color: Colors.white.withValues(alpha: 0.34), size: 12 + (i % 4) * 3),
+              ),
+            Positioned(
+              left: 88,
+              top: 34 + bob,
+              child: Transform.rotate(
+                angle: -0.42 + math.sin(animation.value * math.pi * 2) * 0.08,
+                child: Container(
+                  width: 9,
+                  height: 128,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF92400E),
+                    borderRadius: BorderRadius.circular(99),
+                    boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.28), blurRadius: 12)],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 178,
+              top: 156 + (bob * 0.7),
+              child: Icon(Icons.set_meal_rounded, color: const Color(0xFF67E8F9).withValues(alpha: 0.95), size: 58),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class AnimatedSlotStage extends StatelessWidget {
+  const AnimatedSlotStage({
+    required this.game,
+    required this.outcome,
+    required this.isPlaying,
+    required this.animation,
+    super.key,
+  });
+
+  final GameDefinition game;
+  final GameOutcome? outcome;
+  final bool isPlaying;
+  final Animation<double> animation;
+
+  List<String> get fallbackSymbols {
+    switch (game.visual) {
+      case GameVisual.fruitSlot:
+        return ['🍒', '🍋', '7'];
+      case GameVisual.crystalSlot:
+        return ['◆', '✦', '✧'];
+      case GameVisual.thunderSlot:
+        return ['⚡', '★', 'W'];
+      case GameVisual.roulette:
+      case GameVisual.iceFishing:
+        return ['?', '?', '?'];
+    }
+  }
+
+  Color get panelColor {
+    switch (game.visual) {
+      case GameVisual.fruitSlot:
+        return const Color(0xFF7F1D1D);
+      case GameVisual.crystalSlot:
+        return const Color(0xFF312E81);
+      case GameVisual.thunderSlot:
+        return const Color(0xFF111827);
+      case GameVisual.roulette:
+      case GameVisual.iceFishing:
+        return primary;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reels = (outcome?.result['reels'] as List?)?.map((value) => value.toString()).toList() ?? fallbackSymbols;
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            Positioned.fill(child: GameArtwork(game: game)),
+            Positioned(
+              right: 34,
+              top: 46,
+              child: Container(
+                width: 260,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: panelColor.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: gold.withValues(alpha: 0.76), width: 4),
+                  boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.26), blurRadius: 34)],
+                ),
+                child: Row(
+                  children: List.generate(3, (index) {
+                    final spinOffset = isPlaying ? math.sin((animation.value * math.pi * 8) + index) * 18 : 0.0;
+                    final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 10).floor()) % fallbackSymbols.length] : reels[index];
+                    return Expanded(
+                      child: Transform.translate(
+                        offset: Offset(0, spinOffset),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 260),
+                          height: 118,
+                          margin: const EdgeInsets.symmetric(horizontal: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.94),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Center(
+                            child: Text(
+                              symbol,
+                              style: TextStyle(color: panelColor, fontSize: 36, fontWeight: FontWeight.w900),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 14,
+              top: 96,
+              child: Transform.rotate(
+                angle: isPlaying ? math.sin(animation.value * math.pi * 2) * 0.32 : 0,
+                child: Container(
+                  width: 18,
+                  height: 70,
+                  decoration: BoxDecoration(color: gold, borderRadius: BorderRadius.circular(99)),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class ResultBadge extends StatelessWidget {
+  const ResultBadge({required this.text, super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 82,
+      height: 82,
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: 0.9),
+        shape: BoxShape.circle,
+        border: Border.all(color: gold, width: 4),
+        boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.42), blurRadius: 24)],
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900),
         ),
       ),
     );
