@@ -42,3 +42,10 @@ CREATE TABLE Utente (
 	FOREIGN KEY(FK_Balance) REFERENCES Account_Balance(ID_Balance),
 	FOREIGN KEY(FK_Prefered_Game) REFERENCES Giochi(ID_Gioco)
 );
+
+INSERT INTO Giochi (Nome, Categoria) VALUES
+('Roulette', 'Tavolo'),
+('Ice Fishing', 'Arcade'),
+('Slot Frutta', 'Slot'),
+('Slot Cristalli', 'Slot'),
+('Slot Fulmini', 'Slot');
