@@ -1918,6 +1918,358 @@ class ResultBadge extends StatelessWidget {
   }
 }
 
+class IceWheelPainter extends CustomPainter {
+  IceWheelPainter(this.selectedSegment);
+
+  final String? selectedSegment;
+  final List<String> labels = const ['1x', '2x', '5x', '10x', 'Flip', 'Pach', 'Bonus'];
+  final List<String> keys = const ['1x', '2x', '5x', '10x', 'coin_flip', 'pachinko', 'ice_bonus'];
+  final List<Color> colors = const [
+    Color(0xFFBAE6FD),
+    Color(0xFF38BDF8),
+    Color(0xFF2563EB),
+    Color(0xFF1E3A8A),
+    Color(0xFFFACC15),
+    Color(0xFFA78BFA),
+    Color(0xFFF472B6),
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final sweep = math.pi * 2 / labels.length;
+    final textPainter = TextPainter(textDirection: TextDirection.ltr, textAlign: TextAlign.center);
+
+    for (var i = 0; i < labels.length; i++) {
+      final paint = Paint()..color = colors[i].withValues(alpha: keys[i] == selectedSegment ? 1 : 0.86);
+      canvas.drawArc(rect, -math.pi / 2 + (i * sweep), sweep, true, paint);
+      final labelAngle = -math.pi / 2 + (i * sweep) + sweep / 2;
+      final labelOffset = Offset(center.dx + math.cos(labelAngle) * radius * 0.66, center.dy + math.sin(labelAngle) * radius * 0.66);
+      textPainter.text = TextSpan(text: labels[i], style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900));
+      textPainter.layout();
+      textPainter.paint(canvas, labelOffset - Offset(textPainter.width / 2, textPainter.height / 2));
+    }
+
+    canvas.drawCircle(center, radius - 2, Paint()..style = PaintingStyle.stroke..strokeWidth = 4..color = Colors.white.withValues(alpha: 0.76));
+  }
+
+  @override
+  bool shouldRepaint(covariant IceWheelPainter oldDelegate) => oldDelegate.selectedSegment != selectedSegment;
+}
+
+
+class AnimatedGameStage extends StatelessWidget {
+  const AnimatedGameStage({
+    required this.game,
+    required this.outcome,
+    required this.isPlaying,
+    required this.animation,
+    super.key,
+  });
+
+  final GameDefinition game;
+  final GameOutcome? outcome;
+  final bool isPlaying;
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (game.visual) {
+      case GameVisual.roulette:
+        return AnimatedRouletteStage(
+          game: game,
+          outcome: outcome,
+          isPlaying: isPlaying,
+          animation: animation,
+        );
+      case GameVisual.iceFishing:
+        return AnimatedIceFishingStage(
+          game: game,
+          isPlaying: isPlaying,
+          animation: animation,
+        );
+      case GameVisual.fruitSlot:
+      case GameVisual.crystalSlot:
+      case GameVisual.thunderSlot:
+        return AnimatedSlotStage(
+          game: game,
+          outcome: outcome,
+          isPlaying: isPlaying,
+          animation: animation,
+        );
+    }
+  }
+}
+
+class AnimatedRouletteStage extends StatelessWidget {
+  const AnimatedRouletteStage({
+    required this.game,
+    required this.outcome,
+    required this.isPlaying,
+    required this.animation,
+    super.key,
+  });
+
+  final GameDefinition game;
+  final GameOutcome? outcome;
+  final bool isPlaying;
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final progress = animation.value;
+        final ballAngle = (progress * math.pi * (isPlaying ? 16 : 2)) - math.pi / 2;
+        final ballRadius = isPlaying ? 96.0 : 76.0;
+        return Stack(
+          children: [
+            Positioned.fill(child: GameArtwork(game: game)),
+            Positioned(
+              right: 18,
+              top: 18,
+              child: Transform.rotate(
+                angle: progress * math.pi * (isPlaying ? 14 : 2),
+                child: Container(
+                  width: 230,
+                  height: 230,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: gold.withValues(alpha: 0.92), width: 8),
+                    gradient: SweepGradient(
+                      colors: [
+                        Colors.redAccent,
+                        Colors.black87,
+                        Colors.redAccent,
+                        Colors.black87,
+                        const Color(0xFF16A34A),
+                        Colors.redAccent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 18 + 115 + (math.cos(ballAngle) * ballRadius) - 8,
+              top: 18 + 115 + (math.sin(ballAngle) * ballRadius) - 8,
+              child: Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.9), blurRadius: 14)],
+                ),
+              ),
+            ),
+            if (outcome != null)
+              Positioned(
+                right: 92,
+                top: 94,
+                child: ResultBadge(text: '${outcome!.result['number']}'),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class AnimatedIceFishingStage extends StatelessWidget {
+  const AnimatedIceFishingStage({
+    required this.game,
+    required this.isPlaying,
+    required this.animation,
+    super.key,
+  });
+
+  final GameDefinition game;
+  final bool isPlaying;
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final bob = math.sin(animation.value * math.pi * 2) * (isPlaying ? 16 : 5);
+        return Stack(
+          children: [
+            Positioned.fill(child: GameArtwork(game: game)),
+            for (var i = 0; i < 18; i++)
+              Positioned(
+                left: 18.0 + (i * 43 % 340),
+                top: ((animation.value * 180) + i * 31) % 520,
+                child: Icon(Icons.ac_unit_rounded, color: Colors.white.withValues(alpha: 0.34), size: 12 + (i % 4) * 3),
+              ),
+            Positioned(
+              left: 88,
+              top: 34 + bob,
+              child: Transform.rotate(
+                angle: -0.42 + math.sin(animation.value * math.pi * 2) * 0.08,
+                child: Container(
+                  width: 9,
+                  height: 128,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF92400E),
+                    borderRadius: BorderRadius.circular(99),
+                    boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.28), blurRadius: 12)],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 178,
+              top: 156 + (bob * 0.7),
+              child: Icon(Icons.set_meal_rounded, color: const Color(0xFF67E8F9).withValues(alpha: 0.95), size: 58),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class AnimatedSlotStage extends StatelessWidget {
+  const AnimatedSlotStage({
+    required this.game,
+    required this.outcome,
+    required this.isPlaying,
+    required this.animation,
+    super.key,
+  });
+
+  final GameDefinition game;
+  final GameOutcome? outcome;
+  final bool isPlaying;
+  final Animation<double> animation;
+
+  List<String> get fallbackSymbols {
+    switch (game.visual) {
+      case GameVisual.fruitSlot:
+        return ['🍒', '🍋', '7'];
+      case GameVisual.crystalSlot:
+        return ['◆', '✦', '✧'];
+      case GameVisual.thunderSlot:
+        return ['⚡', '★', 'W'];
+      case GameVisual.roulette:
+      case GameVisual.iceFishing:
+        return ['?', '?', '?'];
+    }
+  }
+
+  Color get panelColor {
+    switch (game.visual) {
+      case GameVisual.fruitSlot:
+        return const Color(0xFF7F1D1D);
+      case GameVisual.crystalSlot:
+        return const Color(0xFF312E81);
+      case GameVisual.thunderSlot:
+        return const Color(0xFF111827);
+      case GameVisual.roulette:
+      case GameVisual.iceFishing:
+        return primary;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reels = (outcome?.result['reels'] as List?)?.map((value) => value.toString()).toList() ?? fallbackSymbols;
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            Positioned.fill(child: GameArtwork(game: game)),
+            Positioned(
+              right: 34,
+              top: 46,
+              child: Container(
+                width: 260,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: panelColor.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: gold.withValues(alpha: 0.76), width: 4),
+                  boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.26), blurRadius: 34)],
+                ),
+                child: Row(
+                  children: List.generate(3, (index) {
+                    final spinOffset = isPlaying ? math.sin((animation.value * math.pi * 8) + index) * 18 : 0.0;
+                    final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 10).floor()) % fallbackSymbols.length] : reels[index];
+                    return Expanded(
+                      child: Transform.translate(
+                        offset: Offset(0, spinOffset),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 260),
+                          height: 118,
+                          margin: const EdgeInsets.symmetric(horizontal: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.94),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Center(
+                            child: Text(
+                              symbol,
+                              style: TextStyle(color: panelColor, fontSize: 36, fontWeight: FontWeight.w900),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 14,
+              top: 96,
+              child: Transform.rotate(
+                angle: isPlaying ? math.sin(animation.value * math.pi * 2) * 0.32 : 0,
+                child: Container(
+                  width: 18,
+                  height: 70,
+                  decoration: BoxDecoration(color: gold, borderRadius: BorderRadius.circular(99)),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class ResultBadge extends StatelessWidget {
+  const ResultBadge({required this.text, super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 82,
+      height: 82,
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: 0.9),
+        shape: BoxShape.circle,
+        border: Border.all(color: gold, width: 4),
+        boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.42), blurRadius: 24)],
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900),
+        ),
+      ),
+    );
+  }
+}
+
 class GamePlayPage extends StatefulWidget {
   const GamePlayPage({required this.game, required this.session, super.key});
 
