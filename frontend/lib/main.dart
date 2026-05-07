@@ -8,6 +8,61 @@ const Color secondary = Color(0xFF593F62);
 const Color accent = Color(0xFFA5C4D4);
 const Color gold = Color(0xFFFFC857);
 const String apiBaseUrl = 'http://127.0.0.1:5000';
+const List<GameDefinition> casinoGames = [
+  GameDefinition(
+    title: 'Roulette',
+    subtitle: 'Punta sul colore vincente',
+    icon: Icons.radar_rounded,
+    visual: GameVisual.roulette,
+    colors: [Color(0xFFE53935), Color(0xFF111827)],
+  ),
+  GameDefinition(
+    title: 'Ice Fishing',
+    subtitle: 'Pesca bonus sotto il ghiaccio',
+    icon: Icons.ac_unit_rounded,
+    visual: GameVisual.iceFishing,
+    colors: [Color(0xFF67E8F9), Color(0xFF1D4ED8)],
+  ),
+  GameDefinition(
+    title: 'Slot Frutta',
+    subtitle: 'Ciliegie, limoni e jackpot',
+    icon: Icons.local_pizza_rounded,
+    visual: GameVisual.fruitSlot,
+    colors: [Color(0xFFFF6B6B), Color(0xFFFFC857)],
+  ),
+  GameDefinition(
+    title: 'Slot Cristalli',
+    subtitle: 'Gemme rare e moltiplicatori',
+    icon: Icons.diamond_rounded,
+    visual: GameVisual.crystalSlot,
+    colors: [Color(0xFF7C3AED), Color(0xFF22D3EE)],
+  ),
+  GameDefinition(
+    title: 'Slot Fulmini',
+    subtitle: 'Giri turbo ad alta tensione',
+    icon: Icons.bolt_rounded,
+    visual: GameVisual.thunderSlot,
+    colors: [Color(0xFF111827), Color(0xFFFACC15)],
+  ),
+];
+
+enum GameVisual { roulette, iceFishing, fruitSlot, crystalSlot, thunderSlot }
+
+class GameDefinition {
+  const GameDefinition({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.visual,
+    required this.colors,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final GameVisual visual;
+  final List<Color> colors;
+}
 
 void main() {
   runApp(const MyApp());
@@ -103,19 +158,7 @@ class AuthScaffold extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: accent.withValues(alpha: 0.12),
-                      border: Border.all(color: accent.withValues(alpha: 0.35)),
-                    ),
-                    child: const Icon(
-                      Icons.casino_rounded,
-                      color: gold,
-                      size: 52,
-                    ),
-                  ),
+                  const BrandLogo(size: 92),
                   const SizedBox(height: 18),
                   Text(
                     title,
@@ -605,13 +648,19 @@ class _MainAppState extends State<MainApp> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Brawls Bets',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        const Row(
+                          children: [
+                            BrandLogo(size: 42),
+                            SizedBox(width: 12),
+                            Text(
+                              'Brawls Bets',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 30,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
                         ),
                         IconButton.filledTonal(
                           onPressed: () => Navigator.of(context).pushReplacementNamed('/'),
@@ -698,7 +747,7 @@ class Dashboard extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'Scegli una modalità',
+          'Giochi disponibili',
           style: TextStyle(
             color: accent.withValues(alpha: 0.86),
             fontSize: 18,
@@ -707,16 +756,19 @@ class Dashboard extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Expanded(
-          child: GridView.count(
-            crossAxisCount: MediaQuery.of(context).size.width > 720 ? 3 : 2,
-            crossAxisSpacing: 14,
-            mainAxisSpacing: 14,
-            children: const [
-              GameCard(icon: Icons.casino_rounded, title: 'Slot'),
-              GameCard(icon: Icons.style_rounded, title: 'Poker'),
-              GameCard(icon: Icons.radar_rounded, title: 'Roulette'),
-              GameCard(icon: Icons.emoji_events_rounded, title: 'Tornei'),
-            ],
+          child: GridView.builder(
+            itemCount: casinoGames.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: MediaQuery.of(context).size.width > 920
+                  ? 3
+                  : MediaQuery.of(context).size.width > 560
+                      ? 2
+                      : 1,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1.12,
+            ),
+            itemBuilder: (context, index) => GameCard(game: casinoGames[index]),
           ),
         ),
       ],
@@ -769,35 +821,379 @@ class InfoPill extends StatelessWidget {
   }
 }
 
-class GameCard extends StatelessWidget {
-  const GameCard({required this.icon, required this.title, super.key});
+class BrandLogo extends StatelessWidget {
+  const BrandLogo({required this.size, super.key});
 
-  final IconData icon;
-  final String title;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [gold, Color(0xFFFF7A45), Color(0xFF7C3AED)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: gold.withValues(alpha: 0.24),
+            blurRadius: size * 0.36,
+            offset: Offset(0, size * 0.12),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Container(
+          width: size * 0.72,
+          height: size * 0.72,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: primary.withValues(alpha: 0.88),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.42), width: 1.2),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(Icons.casino_rounded, color: gold, size: size * 0.42),
+              Positioned(
+                right: size * 0.12,
+                bottom: size * 0.08,
+                child: Text(
+                  'B',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: size * 0.22,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class GameCard extends StatelessWidget {
+  const GameCard({required this.game, super.key});
+
+  final GameDefinition game;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: accent.withValues(alpha: 0.18)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: gold, size: 42),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
-            ),
+        borderRadius: BorderRadius.circular(28),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            game.colors.first.withValues(alpha: 0.82),
+            game.colors.last.withValues(alpha: 0.54),
+            Colors.white.withValues(alpha: 0.08),
+          ],
+        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+        boxShadow: [
+          BoxShadow(
+            color: game.colors.first.withValues(alpha: 0.18),
+            blurRadius: 28,
+            offset: const Offset(0, 16),
           ),
         ],
       ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: Stack(
+          children: [
+            Positioned.fill(child: GameArtwork(game: game)),
+            Positioned(
+              left: 18,
+              right: 18,
+              bottom: 18,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: 0.58),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(game.icon, color: gold, size: 24),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    game.title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    game.subtitle,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.82),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class GameArtwork extends StatelessWidget {
+  const GameArtwork({required this.game, super.key});
+
+  final GameDefinition game;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (game.visual) {
+      case GameVisual.roulette:
+        return const RouletteArtwork();
+      case GameVisual.iceFishing:
+        return const IceFishingArtwork();
+      case GameVisual.fruitSlot:
+        return const SlotArtwork(
+          symbols: ['🍒', '🍋', '7'],
+          panelColor: Color(0xFF7F1D1D),
+          glowColor: Color(0xFFFFC857),
+        );
+      case GameVisual.crystalSlot:
+        return const SlotArtwork(
+          symbols: ['◆', '✦', '✧'],
+          panelColor: Color(0xFF312E81),
+          glowColor: Color(0xFF22D3EE),
+        );
+      case GameVisual.thunderSlot:
+        return const SlotArtwork(
+          symbols: ['⚡', '★', 'W'],
+          panelColor: Color(0xFF111827),
+          glowColor: Color(0xFFFACC15),
+        );
+    }
+  }
+}
+
+class RouletteArtwork extends StatelessWidget {
+  const RouletteArtwork({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned(
+          right: -36,
+          top: -34,
+          child: Container(
+            width: 168,
+            height: 168,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: primary.withValues(alpha: 0.72),
+              border: Border.all(color: gold, width: 10),
+            ),
+            child: Center(
+              child: Container(
+                width: 94,
+                height: 94,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFE53935).withValues(alpha: 0.92),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.74), width: 8),
+                ),
+                child: Center(
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: const BoxDecoration(shape: BoxShape.circle, color: gold),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 22,
+          top: 22,
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: List.generate(
+              9,
+              (index) => Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: index.isEven ? Colors.redAccent : Colors.black87,
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.34)),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class IceFishingArtwork extends StatelessWidget {
+  const IceFishingArtwork({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned(
+          right: 18,
+          top: 20,
+          child: Container(
+            width: 112,
+            height: 112,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.22),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 8),
+            ),
+            child: const Center(
+              child: Icon(Icons.water_rounded, color: Color(0xFF1D4ED8), size: 58),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 26,
+          top: 18,
+          child: Transform.rotate(
+            angle: -0.55,
+            child: Container(
+              width: 7,
+              height: 116,
+              decoration: BoxDecoration(
+                color: const Color(0xFF92400E),
+                borderRadius: BorderRadius.circular(99),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 94,
+          top: 38,
+          child: Container(width: 2, height: 72, color: Colors.white.withValues(alpha: 0.82)),
+        ),
+        Positioned(
+          left: 62,
+          top: 116,
+          child: Icon(Icons.set_meal_rounded, color: gold.withValues(alpha: 0.92), size: 58),
+        ),
+        Positioned(
+          left: -22,
+          bottom: 42,
+          child: Container(
+            width: 180,
+            height: 34,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.24),
+              borderRadius: BorderRadius.circular(99),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class SlotArtwork extends StatelessWidget {
+  const SlotArtwork({
+    required this.symbols,
+    required this.panelColor,
+    required this.glowColor,
+    super.key,
+  });
+
+  final List<String> symbols;
+  final Color panelColor;
+  final Color glowColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned(
+          right: 18,
+          top: 20,
+          child: Container(
+            width: 132,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: panelColor.withValues(alpha: 0.88),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: glowColor.withValues(alpha: 0.76), width: 3),
+              boxShadow: [
+                BoxShadow(color: glowColor.withValues(alpha: 0.22), blurRadius: 30),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: symbols
+                  .map(
+                    (symbol) => Expanded(
+                      child: Container(
+                        height: 70,
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.92),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Center(
+                          child: Text(
+                            symbol,
+                            style: TextStyle(
+                              color: panelColor,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ),
+        Positioned(
+          right: 0,
+          top: 54,
+          child: Container(
+            width: 16,
+            height: 48,
+            decoration: BoxDecoration(
+              color: glowColor,
+              borderRadius: BorderRadius.circular(99),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 24,
+          top: 26,
+          child: Icon(Icons.auto_awesome_rounded, color: glowColor.withValues(alpha: 0.9), size: 42),
+        ),
+      ],
     );
   }
 }

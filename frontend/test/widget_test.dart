@@ -10,4 +10,15 @@ void main() {
     expect(find.text('Login'), findsOneWidget);
     expect(find.text('Crea un nuovo account'), findsOneWidget);
   });
+
+  test('include i giochi principali della dashboard', () {
+    expect(
+      casinoGames.map((game) => game.title),
+      containsAll(['Roulette', 'Ice Fishing']),
+    );
+    expect(
+      casinoGames.where((game) => game.title.startsWith('Slot')),
+      hasLength(3),
+    );
+  });
 }
