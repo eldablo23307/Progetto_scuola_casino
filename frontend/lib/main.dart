@@ -1918,6 +1918,478 @@ class ResultBadge extends StatelessWidget {
   }
 }
 
+class GamePlayPage extends StatefulWidget {
+  const GamePlayPage({required this.game, required this.session, super.key});
+
+  final GameDefinition game;
+  final UserSession session;
+
+  @override
+  State<GamePlayPage> createState() => _GamePlayPageState();
+}
+
+class _GamePlayPageState extends State<GamePlayPage> {
+  final TextEditingController betController = TextEditingController(text: '50');
+  late UserSession session;
+  String? selectedChoice;
+  bool isPlaying = false;
+  String? errorMessage;
+  GameOutcome? outcome;
+
+  @override
+  void initState() {
+    super.initState();
+    session = widget.session;
+    if (widget.game.choices.isNotEmpty) {
+      selectedChoice = widget.game.choices.first.value;
+    }
+  }
+
+  @override
+  void dispose() {
+    betController.dispose();
+    super.dispose();
+  }
+
+  Future<void> play() async {
+    final bet = double.tryParse(betController.text.replaceAll(',', '.'));
+    if (bet == null || bet <= 0) {
+      setState(() => errorMessage = 'Inserisci una puntata valida.');
+      return;
+    }
+
+    setState(() {
+      isPlaying = true;
+      errorMessage = null;
+    });
+
+    try {
+      final body = <String, Object>{
+        'id_giocatore': session.playerId,
+        'bet': bet,
+        if (widget.game.needsChoice) 'choice': selectedChoice ?? '',
+      };
+      final response = await http.post(
+        Uri.parse('$apiBaseUrl${widget.game.apiPath}'),
+        headers: const {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Giocata non riuscita');
+      }
+
+      final played = GameOutcome.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+      setState(() {
+        outcome = played;
+        session = session.copyWith(balance: played.balance);
+      });
+    } catch (_) {
+      setState(() {
+        errorMessage = 'Giocata non riuscita: controlla saldo, puntata e backend.';
+      });
+    } finally {
+      if (mounted) {
+        setState(() => isPlaying = false);
+      }
+    }
+  }
+
+  void closeWithSession() {
+    Navigator.of(context).pop(session);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) closeWithSession();
+      },
+      child: Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [primary, widget.game.colors.last.withValues(alpha: 0.74)],
+            ),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      IconButton.filledTonal(
+                        onPressed: closeWithSession,
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          widget.game.title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide = constraints.maxWidth > 860;
+                      final gamePanel = GameHeroPanel(game: widget.game, outcome: outcome);
+                      final controls = GameControls(
+                        game: widget.game,
+                        session: session,
+                        betController: betController,
+                        selectedChoice: selectedChoice,
+                        outcome: outcome,
+                        errorMessage: errorMessage,
+                        isPlaying: isPlaying,
+                        onChoiceSelected: (choice) => setState(() => selectedChoice = choice),
+                        onPlay: play,
+                      );
+
+                      if (isWide) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(flex: 6, child: gamePanel),
+                            const SizedBox(width: 22),
+                            Expanded(flex: 4, child: controls),
+                          ],
+                        );
+                      }
+
+                      return Column(
+                        children: [
+                          gamePanel,
+                          const SizedBox(height: 18),
+                          controls,
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class GameHeroPanel extends StatelessWidget {
+  const GameHeroPanel({required this.game, required this.outcome, super.key});
+
+  final GameDefinition game;
+  final GameOutcome? outcome;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 520,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(34),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+        boxShadow: [BoxShadow(color: game.colors.first.withValues(alpha: 0.22), blurRadius: 36)],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(34),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.network(
+                game.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => GameArtwork(game: game),
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.black.withValues(alpha: 0.18), primary.withValues(alpha: 0.9)],
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(child: GameArtwork(game: game)),
+            if (game.visual == GameVisual.iceFishing)
+              Positioned(
+                right: 26,
+                top: 28,
+                child: IceWheel(outcome: outcome),
+              ),
+            Positioned(
+              left: 28,
+              right: 28,
+              bottom: 28,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    game.subtitle,
+                    style: TextStyle(color: accent.withValues(alpha: 0.86), fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    outcome?.message ?? 'Scegli la puntata e premi Gioca.',
+                    style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class GameControls extends StatelessWidget {
+  const GameControls({
+    required this.game,
+    required this.session,
+    required this.betController,
+    required this.selectedChoice,
+    required this.outcome,
+    required this.errorMessage,
+    required this.isPlaying,
+    required this.onChoiceSelected,
+    required this.onPlay,
+    super.key,
+  });
+
+  final GameDefinition game;
+  final UserSession session;
+  final TextEditingController betController;
+  final String? selectedChoice;
+  final GameOutcome? outcome;
+  final String? errorMessage;
+  final bool isPlaying;
+  final ValueChanged<String> onChoiceSelected;
+  final VoidCallback onPlay;
+
+  @override
+  Widget build(BuildContext context) {
+    return AuthCard(
+      children: [
+        InfoPill(
+          icon: Icons.account_balance_wallet_rounded,
+          label: 'Saldo attuale',
+          value: '${session.balance.toStringAsFixed(2)} crediti',
+        ),
+        const SizedBox(height: 18),
+        StyledTextField(
+          controller: betController,
+          hintText: 'Puntata',
+          icon: Icons.paid_outlined,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        ),
+        if (game.choices.isNotEmpty) ...[
+          const SizedBox(height: 18),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              game.visual == GameVisual.iceFishing ? 'Punta sul settore della ruota' : 'Scegli una giocata',
+              style: TextStyle(color: accent.withValues(alpha: 0.82), fontWeight: FontWeight.w700),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: game.choices.map((choice) {
+              final selected = choice.value == selectedChoice;
+              return ChoiceChip(
+                selected: selected,
+                label: Text(choice.label),
+                selectedColor: gold,
+                labelStyle: TextStyle(color: selected ? primary : Colors.white, fontWeight: FontWeight.w800),
+                onSelected: (_) => onChoiceSelected(choice.value),
+              );
+            }).toList(),
+          ),
+        ],
+        const SizedBox(height: 22),
+        PrimaryButton(label: 'Gioca', isLoading: isPlaying, onPressed: onPlay),
+        if (errorMessage != null) ...[
+          const SizedBox(height: 14),
+          Text(errorMessage!, style: const TextStyle(color: Colors.redAccent)),
+        ],
+        if (outcome != null) ...[
+          const SizedBox(height: 20),
+          OutcomeCard(outcome: outcome!),
+        ],
+      ],
+    );
+  }
+}
+
+class OutcomeCard extends StatelessWidget {
+  const OutcomeCard({required this.outcome, super.key});
+
+  final GameOutcome outcome;
+
+  @override
+  Widget build(BuildContext context) {
+    final positive = outcome.profit >= 0;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: 0.56),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: (positive ? gold : Colors.redAccent).withValues(alpha: 0.42)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(outcome.message, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              MiniStat(label: 'Puntata', value: outcome.bet.toStringAsFixed(2)),
+              MiniStat(label: 'Vincita', value: outcome.payout.toStringAsFixed(2)),
+              MiniStat(label: 'Profitto', value: outcome.profit.toStringAsFixed(2), highlight: positive),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(_details(outcome.result), style: TextStyle(color: accent.withValues(alpha: 0.82))),
+        ],
+      ),
+    );
+  }
+
+  String _details(Map<String, dynamic> result) {
+    if (result.containsKey('reels')) {
+      return "Rulli: ${(result['reels'] as List).join('  ')}";
+    }
+    if (result.containsKey('number')) {
+      return "Numero: ${result['number']} - Colore: ${result['color']}";
+    }
+    if (result.containsKey('segmentLabel')) {
+      final bonus = result['bonus'] as Map<String, dynamic>?;
+      return bonus == null
+          ? "Settore: ${result['segmentLabel']} - Moltiplicatore: ${result['multiplier']}x"
+          : "Settore: ${result['segmentLabel']} - ${bonus['label']} (${bonus['multiplier']}x)";
+    }
+    return 'Risultato registrato.';
+  }
+}
+
+class MiniStat extends StatelessWidget {
+  const MiniStat({required this.label, required this.value, this.highlight = false, super.key});
+
+  final String label;
+  final String value;
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(color: accent.withValues(alpha: 0.72), fontSize: 12)),
+          Text(value, style: TextStyle(color: highlight ? gold : Colors.white, fontWeight: FontWeight.w900)),
+        ],
+      ),
+    );
+  }
+}
+
+class IceWheel extends StatelessWidget {
+  const IceWheel({required this.outcome, super.key});
+
+  final GameOutcome? outcome;
+
+  @override
+  Widget build(BuildContext context) {
+    final segment = outcome?.result['segment'] as String?;
+    return SizedBox(
+      width: 210,
+      height: 210,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CustomPaint(size: const Size.square(210), painter: IceWheelPainter(segment)),
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: primary.withValues(alpha: 0.9),
+              border: Border.all(color: gold, width: 3),
+            ),
+            child: const Icon(Icons.ac_unit_rounded, color: gold, size: 34),
+          ),
+          const Positioned(top: 0, child: Icon(Icons.arrow_drop_down_rounded, color: gold, size: 44)),
+        ],
+      ),
+    );
+  }
+}
+
+class IceWheelPainter extends CustomPainter {
+  IceWheelPainter(this.selectedSegment);
+
+  final String? selectedSegment;
+  final List<String> labels = const ['1x', '2x', '5x', '10x', 'Flip', 'Pach', 'Bonus'];
+  final List<String> keys = const ['1x', '2x', '5x', '10x', 'coin_flip', 'pachinko', 'ice_bonus'];
+  final List<Color> colors = const [
+    Color(0xFFBAE6FD),
+    Color(0xFF38BDF8),
+    Color(0xFF2563EB),
+    Color(0xFF1E3A8A),
+    Color(0xFFFACC15),
+    Color(0xFFA78BFA),
+    Color(0xFFF472B6),
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final sweep = math.pi * 2 / labels.length;
+    final textPainter = TextPainter(textDirection: TextDirection.ltr, textAlign: TextAlign.center);
+
+    for (var i = 0; i < labels.length; i++) {
+      final paint = Paint()..color = colors[i].withValues(alpha: keys[i] == selectedSegment ? 1 : 0.86);
+      canvas.drawArc(rect, -math.pi / 2 + (i * sweep), sweep, true, paint);
+      final labelAngle = -math.pi / 2 + (i * sweep) + sweep / 2;
+      final labelOffset = Offset(center.dx + math.cos(labelAngle) * radius * 0.66, center.dy + math.sin(labelAngle) * radius * 0.66);
+      textPainter.text = TextSpan(text: labels[i], style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900));
+      textPainter.layout();
+      textPainter.paint(canvas, labelOffset - Offset(textPainter.width / 2, textPainter.height / 2));
+    }
+
+    canvas.drawCircle(center, radius - 2, Paint()..style = PaintingStyle.stroke..strokeWidth = 4..color = Colors.white.withValues(alpha: 0.76));
+  }
+
+  @override
+  bool shouldRepaint(covariant IceWheelPainter oldDelegate) => oldDelegate.selectedSegment != selectedSegment;
+}
+
 class GameArtwork extends StatelessWidget {
   const GameArtwork({required this.game, super.key});
 
