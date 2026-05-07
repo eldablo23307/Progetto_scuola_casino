@@ -8,7 +8,6 @@ const Color secondary = Color(0xFF593F62);
 const Color accent = Color(0xFFA5C4D4);
 const Color gold = Color(0xFFFFC857);
 const String apiBaseUrl = 'http://127.0.0.1:5000';
-
 const List<GameDefinition> casinoGames = [
   GameDefinition(
     title: 'Roulette',
