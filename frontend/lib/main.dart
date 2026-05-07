@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+
 void main() {
     runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget{
   const MyApp({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -313,9 +314,9 @@ class _RegisterFormState extends State<RegisterForm> {
                                     addressController.text,
                                     );
                                 if (response.statusCode == 200) {
-                                  Navigator.of(context).pushNamed('/MainApp');
+                                    Navigator.of(context).pushNamed('/MainApp');
                                 }
-                                },
+                            },
                             child: Text("Register",
                                 style: TextStyle(color: Color(0XFFA5C4D4)),
                             ),
@@ -335,11 +336,28 @@ class MainApp extends StatelessWidget {
     Widget build(BuildContext context){
       return Scaffold(
         backgroundColor: Color(0xFF593F62),
-        appBar: AppBar(
-          title: const Text("Brawls Bets")
-        ),
+        
         body: Center(
-
+            child: Column(
+                children: [
+                    Text(
+                        "Brawls Bets",
+                        style: TextStyle(color: Color(0xFFA5C4D4), fontSize: 40, fontFamily: "Roboto"),
+                    ),
+                    Container(
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Color(0xFFA5C4D4))
+                        ),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                                
+                            ],
+                        ),
+                    )
+                ],
+            ),
         ),
       );
     }
