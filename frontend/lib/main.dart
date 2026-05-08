@@ -1286,7 +1286,7 @@ class GameHeroPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 520,
+      height: 620,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(34),
         border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
@@ -1324,8 +1324,8 @@ class GameHeroPanel extends StatelessWidget {
             ),
             if (game.visual == GameVisual.iceFishing)
               Positioned(
-                right: 26,
-                top: 28,
+                right: 22,
+                top: 22,
                 child: IceWheel(
                   outcome: outcome,
                   isPlaying: isPlaying,
@@ -1534,35 +1534,59 @@ class IceWheel extends StatelessWidget {
   Widget build(BuildContext context) {
     final segment = outcome?.result['segment'] as String?;
     return SizedBox(
-      width: 210,
-      height: 210,
+      width: 270,
+      height: 270,
       child: AnimatedBuilder(
         animation: animation,
         builder: (context, child) {
-          final turns = isPlaying ? animation.value * math.pi * 10 : animation.value * math.pi * 2;
+          final pulse = 1 + (math.sin(animation.value * math.pi * 2).abs() * (isPlaying ? 0.08 : 0.03));
+          final turns = isPlaying ? animation.value * math.pi * 14 : _iceWheelRotationForSegment(segment) + animation.value * math.pi * 2;
           return Stack(
             alignment: Alignment.center,
             children: [
-              Transform.rotate(
-                angle: turns,
-                child: CustomPaint(size: const Size.square(210), painter: IceWheelPainter(segment)),
-              ),
               Container(
-                width: 72,
-                height: 72,
+                width: 270,
+                height: 270,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: primary.withValues(alpha: 0.9),
-                  border: Border.all(color: gold, width: 3),
+                  boxShadow: [
+                    BoxShadow(color: const Color(0xFF67E8F9).withValues(alpha: 0.34), blurRadius: 36, spreadRadius: 4),
+                    BoxShadow(color: gold.withValues(alpha: 0.18), blurRadius: 56, spreadRadius: 10),
+                  ],
                 ),
-                child: const Icon(Icons.ac_unit_rounded, color: gold, size: 34),
               ),
-              const Positioned(top: 0, child: Icon(Icons.arrow_drop_down_rounded, color: gold, size: 44)),
+              Transform.scale(
+                scale: pulse,
+                child: Transform.rotate(
+                  angle: turns,
+                  child: CustomPaint(size: const Size.square(252), painter: IceWheelPainter(segment)),
+                ),
+              ),
+              Container(
+                width: 86,
+                height: 86,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: primary.withValues(alpha: 0.92),
+                  border: Border.all(color: gold, width: 4),
+                  boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.38), blurRadius: 22)],
+                ),
+                child: const Icon(Icons.ac_unit_rounded, color: gold, size: 42),
+              ),
+              const Positioned(top: -5, child: Icon(Icons.arrow_drop_down_rounded, color: gold, size: 56)),
             ],
           );
         },
       ),
     );
+  }
+
+  double _iceWheelRotationForSegment(String? segment) {
+    if (segment == null) return 0;
+    const keys = ['1x', '2x', '5x', '10x', 'coin_flip', 'pachinko', 'ice_bonus'];
+    final index = keys.indexOf(segment);
+    if (index < 0) return 0;
+    return -(index * (math.pi * 2 / keys.length));
   }
 }
 
@@ -1591,22 +1615,41 @@ class IceWheelPainter extends CustomPainter {
     final textPainter = TextPainter(textDirection: TextDirection.ltr, textAlign: TextAlign.center);
 
     for (var i = 0; i < labels.length; i++) {
-      final paint = Paint()..color = colors[i].withValues(alpha: keys[i] == selectedSegment ? 1 : 0.86);
+      final selected = keys[i] == selectedSegment;
+      final paint = Paint()..color = colors[i].withValues(alpha: selected ? 1 : 0.88);
       canvas.drawArc(rect, -math.pi / 2 + (i * sweep), sweep, true, paint);
+      canvas.drawArc(
+        rect.deflate(4),
+        -math.pi / 2 + (i * sweep),
+        sweep,
+        true,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = selected ? 5 : 2
+          ..color = Colors.white.withValues(alpha: selected ? 0.95 : 0.34),
+      );
       final labelAngle = -math.pi / 2 + (i * sweep) + sweep / 2;
-      final labelOffset = Offset(center.dx + math.cos(labelAngle) * radius * 0.66, center.dy + math.sin(labelAngle) * radius * 0.66);
-      textPainter.text = TextSpan(text: labels[i], style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900));
+      final labelOffset = Offset(center.dx + math.cos(labelAngle) * radius * 0.64, center.dy + math.sin(labelAngle) * radius * 0.64);
+      textPainter.text = TextSpan(
+        text: labels[i],
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: selected ? 17 : 15,
+          fontWeight: FontWeight.w900,
+          shadows: const [Shadow(color: Colors.black54, blurRadius: 6)],
+        ),
+      );
       textPainter.layout();
       textPainter.paint(canvas, labelOffset - Offset(textPainter.width / 2, textPainter.height / 2));
     }
 
-    canvas.drawCircle(center, radius - 2, Paint()..style = PaintingStyle.stroke..strokeWidth = 4..color = Colors.white.withValues(alpha: 0.76));
+    canvas.drawCircle(center, radius - 2, Paint()..style = PaintingStyle.stroke..strokeWidth = 5..color = Colors.white.withValues(alpha: 0.82));
+    canvas.drawCircle(center, radius - 18, Paint()..style = PaintingStyle.stroke..strokeWidth = 2..color = primary.withValues(alpha: 0.48));
   }
 
   @override
   bool shouldRepaint(covariant IceWheelPainter oldDelegate) => oldDelegate.selectedSegment != selectedSegment;
 }
-
 
 class AnimatedGameStage extends StatelessWidget {
   const AnimatedGameStage({
@@ -1635,6 +1678,7 @@ class AnimatedGameStage extends StatelessWidget {
       case GameVisual.iceFishing:
         return AnimatedIceFishingStage(
           game: game,
+          outcome: outcome,
           isPlaying: isPlaying,
           animation: animation,
         );
@@ -1650,6 +1694,48 @@ class AnimatedGameStage extends StatelessWidget {
     }
   }
 }
+
+const List<int> europeanRouletteNumbers = [
+  0,
+  32,
+  15,
+  19,
+  4,
+  21,
+  2,
+  25,
+  17,
+  34,
+  6,
+  27,
+  13,
+  36,
+  11,
+  30,
+  8,
+  23,
+  10,
+  5,
+  24,
+  16,
+  33,
+  1,
+  20,
+  14,
+  31,
+  9,
+  22,
+  18,
+  29,
+  7,
+  28,
+  12,
+  35,
+  3,
+  26,
+];
+
+const Set<int> europeanRouletteRedNumbers = {1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36};
 
 class AnimatedRouletteStage extends StatelessWidget {
   const AnimatedRouletteStage({
@@ -1671,71 +1757,158 @@ class AnimatedRouletteStage extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         final progress = animation.value;
-        final ballAngle = (progress * math.pi * (isPlaying ? 16 : 2)) - math.pi / 2;
-        final ballRadius = isPlaying ? 96.0 : 76.0;
+        final number = (outcome?.result['number'] as num?)?.toInt();
+        final landedColor = (outcome?.result['color'] as String?) ?? '';
+        final wheelRotation = isPlaying ? progress * math.pi * 18 : _rotationForNumber(number) + progress * math.pi * 2;
+        final ballAngle = isPlaying ? (progress * math.pi * -24) - math.pi / 2 : -math.pi / 2;
+        final ballRadius = isPlaying ? 156.0 - (progress * 28) : 126.0;
         return Stack(
           children: [
             Positioned.fill(child: GameArtwork(game: game)),
+            Positioned.fill(
+              child: CustomPaint(
+                painter: CasinoParticlePainter(
+                  progress: progress,
+                  color: landedColor == 'green' ? const Color(0xFF16A34A) : landedColor == 'red' ? Colors.redAccent : Colors.white,
+                  intense: outcome != null && !isPlaying,
+                ),
+              ),
+            ),
             Positioned(
-              right: 18,
-              top: 18,
-              child: Transform.rotate(
-                angle: progress * math.pi * (isPlaying ? 14 : 2),
-                child: Container(
-                  width: 230,
-                  height: 230,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: gold.withValues(alpha: 0.92), width: 8),
-                    gradient: SweepGradient(
-                      colors: [
-                        Colors.redAccent,
-                        Colors.black87,
-                        Colors.redAccent,
-                        Colors.black87,
-                        const Color(0xFF16A34A),
-                        Colors.redAccent,
-                      ],
+              right: 34,
+              top: 38,
+              child: SizedBox(
+                width: 370,
+                height: 370,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 370,
+                      height: 370,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(color: gold.withValues(alpha: 0.28), blurRadius: 46, spreadRadius: 4),
+                          BoxShadow(color: Colors.black.withValues(alpha: 0.48), blurRadius: 30, offset: const Offset(0, 18)),
+                        ],
+                      ),
                     ),
-                  ),
+                    Transform.rotate(
+                      angle: wheelRotation,
+                      child: const CustomPaint(size: Size.square(350), painter: RouletteWheelPainter()),
+                    ),
+                    Positioned(
+                      left: 185 + (math.cos(ballAngle) * ballRadius) - 10,
+                      top: 185 + (math.sin(ballAngle) * ballRadius) - 10,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.95), blurRadius: 18, spreadRadius: 2)],
+                        ),
+                      ),
+                    ),
+                    const Positioned(top: -7, child: Icon(Icons.arrow_drop_down_rounded, color: gold, size: 58)),
+                    if (outcome != null && !isPlaying)
+                      ResultBadge(text: '$number'),
+                  ],
                 ),
               ),
             ),
-            Positioned(
-              right: 18 + 115 + (math.cos(ballAngle) * ballRadius) - 8,
-              top: 18 + 115 + (math.sin(ballAngle) * ballRadius) - 8,
-              child: Container(
-                width: 16,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.9), blurRadius: 14)],
-                ),
-              ),
-            ),
-            if (outcome != null)
+            if (outcome != null && !isPlaying)
               Positioned(
-                right: 92,
-                top: 94,
-                child: ResultBadge(text: '${outcome!.result['number']}'),
+                left: 34,
+                top: 52,
+                child: ResultSpotlight(
+                  title: 'Risultato roulette',
+                  value: '$number ${_italianRouletteColor(landedColor)}',
+                  color: landedColor == 'green' ? const Color(0xFF16A34A) : landedColor == 'red' ? Colors.redAccent : Colors.black87,
+                ),
               ),
           ],
         );
       },
     );
   }
+
+  double _rotationForNumber(int? number) {
+    if (number == null) return 0;
+    final index = europeanRouletteNumbers.indexOf(number);
+    if (index < 0) return 0;
+    return -(index * (math.pi * 2 / europeanRouletteNumbers.length));
+  }
+
+  String _italianRouletteColor(String color) {
+    switch (color) {
+      case 'red':
+        return 'rosso';
+      case 'black':
+        return 'nero';
+      case 'green':
+        return 'verde';
+      default:
+        return '';
+    }
+  }
+}
+
+class RouletteWheelPainter extends CustomPainter {
+  const RouletteWheelPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final sweep = math.pi * 2 / europeanRouletteNumbers.length;
+    final textPainter = TextPainter(textDirection: TextDirection.ltr, textAlign: TextAlign.center);
+
+    for (var i = 0; i < europeanRouletteNumbers.length; i++) {
+      final number = europeanRouletteNumbers[i];
+      final color = number == 0 ? const Color(0xFF16A34A) : europeanRouletteRedNumbers.contains(number) ? const Color(0xFFDC2626) : const Color(0xFF111827);
+      final start = -math.pi / 2 + (i * sweep) - (sweep / 2);
+      canvas.drawArc(rect, start, sweep, true, Paint()..color = color);
+      canvas.drawArc(rect.deflate(2), start, sweep, true, Paint()..style = PaintingStyle.stroke..strokeWidth = 1.2..color = Colors.white.withValues(alpha: 0.55));
+
+      final labelAngle = -math.pi / 2 + (i * sweep);
+      final labelOffset = Offset(center.dx + math.cos(labelAngle) * radius * 0.82, center.dy + math.sin(labelAngle) * radius * 0.82);
+      canvas.save();
+      canvas.translate(labelOffset.dx, labelOffset.dy);
+      canvas.rotate(labelAngle + math.pi / 2);
+      textPainter.text = TextSpan(
+        text: '$number',
+        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900, shadows: [Shadow(color: Colors.black, blurRadius: 3)]),
+      );
+      textPainter.layout();
+      textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
+      canvas.restore();
+    }
+
+    canvas.drawCircle(center, radius - 2, Paint()..style = PaintingStyle.stroke..strokeWidth = 9..color = gold);
+    canvas.drawCircle(center, radius * 0.68, Paint()..style = PaintingStyle.stroke..strokeWidth = 7..color = const Color(0xFFF8E7B4));
+    canvas.drawCircle(center, radius * 0.46, Paint()..color = const Color(0xFF7C2D12));
+    canvas.drawCircle(center, radius * 0.28, Paint()..color = gold);
+    canvas.drawCircle(center, radius * 0.14, Paint()..color = primary);
+  }
+
+  @override
+  bool shouldRepaint(covariant RouletteWheelPainter oldDelegate) => false;
 }
 
 class AnimatedIceFishingStage extends StatelessWidget {
   const AnimatedIceFishingStage({
     required this.game,
+    required this.outcome,
     required this.isPlaying,
     required this.animation,
     super.key,
   });
 
   final GameDefinition game;
+  final GameOutcome? outcome;
   final bool isPlaying;
   final Animation<double> animation;
 
@@ -1744,40 +1917,137 @@ class AnimatedIceFishingStage extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        final bob = math.sin(animation.value * math.pi * 2) * (isPlaying ? 16 : 5);
+        final progress = animation.value;
+        final bob = math.sin(progress * math.pi * 2) * (isPlaying ? 24 : 8);
+        final segment = outcome?.result['segment'] as String?;
+        final bonus = outcome?.result['bonus'] as Map<String, dynamic>?;
+        final isSpecial = segment == 'coin_flip' || segment == 'pachinko' || segment == 'ice_bonus';
         return Stack(
           children: [
             Positioned.fill(child: GameArtwork(game: game)),
-            for (var i = 0; i < 18; i++)
+            Positioned.fill(
+              child: CustomPaint(
+                painter: CasinoParticlePainter(
+                  progress: progress,
+                  color: isSpecial ? gold : const Color(0xFF67E8F9),
+                  intense: outcome != null && !isPlaying,
+                ),
+              ),
+            ),
+            for (var i = 0; i < 30; i++)
               Positioned(
-                left: 18.0 + (i * 43 % 340),
-                top: ((animation.value * 180) + i * 31) % 520,
-                child: Icon(Icons.ac_unit_rounded, color: Colors.white.withValues(alpha: 0.34), size: 12 + (i % 4) * 3),
+                left: 18.0 + (i * 53 % 560),
+                top: ((progress * (isPlaying ? 280 : 95)) + i * 31) % 620,
+                child: Transform.rotate(
+                  angle: progress * math.pi * 2 + i,
+                  child: Icon(Icons.ac_unit_rounded, color: Colors.white.withValues(alpha: 0.22 + (i % 4) * 0.06), size: 14 + (i % 5) * 4),
+                ),
               ),
             Positioned(
-              left: 88,
-              top: 34 + bob,
+              left: 76,
+              top: 48 + bob,
               child: Transform.rotate(
-                angle: -0.42 + math.sin(animation.value * math.pi * 2) * 0.08,
+                angle: -0.52 + math.sin(progress * math.pi * 2) * 0.14,
                 child: Container(
-                  width: 9,
-                  height: 128,
+                  width: 13,
+                  height: 172,
                   decoration: BoxDecoration(
                     color: const Color(0xFF92400E),
                     borderRadius: BorderRadius.circular(99),
-                    boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.28), blurRadius: 12)],
+                    boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.38), blurRadius: 18)],
                   ),
                 ),
               ),
             ),
+            Positioned(left: 138, top: 166 + (bob * 0.58), child: Container(width: 2, height: 130, color: Colors.white.withValues(alpha: 0.76))),
             Positioned(
-              left: 178,
-              top: 156 + (bob * 0.7),
-              child: Icon(Icons.set_meal_rounded, color: const Color(0xFF67E8F9).withValues(alpha: 0.95), size: 58),
+              left: 92,
+              top: 286 + (bob * 0.28),
+              child: Transform.scale(
+                scale: 1 + math.sin(progress * math.pi * 2).abs() * (isPlaying ? 0.18 : 0.08),
+                child: Icon(Icons.set_meal_rounded, color: const Color(0xFF67E8F9).withValues(alpha: 0.98), size: 88),
+              ),
             ),
+            Positioned(
+              left: 220,
+              right: 58,
+              bottom: 92,
+              child: Container(
+                height: 110,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.28), width: 2),
+                  boxShadow: [BoxShadow(color: const Color(0xFF67E8F9).withValues(alpha: 0.22), blurRadius: 28)],
+                ),
+              ),
+            ),
+            if (outcome != null && !isPlaying)
+              Positioned(
+                left: 34,
+                top: 52,
+                child: ResultSpotlight(
+                  title: isSpecial ? 'Bonus speciale!' : 'Settore pescato',
+                  value: bonus == null ? '${outcome!.result['segmentLabel']}' : '${bonus['label']} • ${bonus['multiplier']}x',
+                  color: isSpecial ? gold : const Color(0xFF67E8F9),
+                ),
+              ),
+            if (outcome != null && !isPlaying && isSpecial)
+              Positioned(
+                left: 270,
+                top: 118,
+                child: IceSpecialEffect(segment: segment!, bonus: bonus, progress: progress),
+              ),
           ],
         );
       },
+    );
+  }
+}
+
+class IceSpecialEffect extends StatelessWidget {
+  const IceSpecialEffect({required this.segment, required this.bonus, required this.progress, super.key});
+
+  final String segment;
+  final Map<String, dynamic>? bonus;
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = switch (segment) {
+      'coin_flip' => Icons.currency_exchange_rounded,
+      'pachinko' => Icons.sports_baseball_rounded,
+      _ => Icons.phishing_rounded,
+    };
+    final title = switch (segment) {
+      'coin_flip' => 'COIN FLIP',
+      'pachinko' => 'PACHINKO',
+      _ => 'ICE BONUS',
+    };
+    return Transform.scale(
+      scale: 1 + math.sin(progress * math.pi * 2).abs() * 0.08,
+      child: Container(
+        width: 220,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: [gold.withValues(alpha: 0.96), const Color(0xFF67E8F9).withValues(alpha: 0.9)]),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.82), width: 3),
+          boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.42), blurRadius: 36, spreadRadius: 4)],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: primary, size: 58),
+            const SizedBox(height: 8),
+            Text(title, style: const TextStyle(color: primary, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+            if (bonus != null) ...[
+              const SizedBox(height: 6),
+              Text('${bonus!['multiplier']}x', style: const TextStyle(color: primary, fontSize: 38, fontWeight: FontWeight.w900)),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1830,14 +2100,20 @@ class AnimatedSlotStage extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
+        final win = outcome != null && outcome!.profit > 0;
         return Stack(
           children: [
             Positioned.fill(child: GameArtwork(game: game)),
+            Positioned.fill(
+              child: CustomPaint(
+                painter: CasinoParticlePainter(progress: animation.value, color: win ? gold : game.colors.first, intense: win),
+              ),
+            ),
             Positioned(
               right: 34,
-              top: 46,
+              top: 58,
               child: Container(
-                width: 260,
+                width: 340,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: panelColor.withValues(alpha: 0.92),
@@ -1854,7 +2130,7 @@ class AnimatedSlotStage extends StatelessWidget {
                         offset: Offset(0, spinOffset),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 260),
-                          height: 118,
+                          height: 150,
                           margin: const EdgeInsets.symmetric(horizontal: 5),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.94),
@@ -1863,7 +2139,7 @@ class AnimatedSlotStage extends StatelessWidget {
                           child: Center(
                             child: Text(
                               symbol,
-                              style: TextStyle(color: panelColor, fontSize: 36, fontWeight: FontWeight.w900),
+                              style: TextStyle(color: panelColor, fontSize: 46, fontWeight: FontWeight.w900),
                             ),
                           ),
                         ),
@@ -1874,20 +2150,90 @@ class AnimatedSlotStage extends StatelessWidget {
               ),
             ),
             Positioned(
-              right: 14,
-              top: 96,
+              right: 10,
+              top: 120,
               child: Transform.rotate(
                 angle: isPlaying ? math.sin(animation.value * math.pi * 2) * 0.32 : 0,
                 child: Container(
                   width: 18,
-                  height: 70,
+                  height: 88,
                   decoration: BoxDecoration(color: gold, borderRadius: BorderRadius.circular(99)),
                 ),
               ),
             ),
+            if (outcome != null && !isPlaying)
+              Positioned(
+                left: 34,
+                top: 52,
+                child: ResultSpotlight(
+                  title: win ? 'Combinazione vincente' : 'Rulli fermati',
+                  value: reels.join('  '),
+                  color: win ? gold : game.colors.first,
+                ),
+              ),
           ],
         );
       },
+    );
+  }
+}
+
+class CasinoParticlePainter extends CustomPainter {
+  CasinoParticlePainter({required this.progress, required this.color, required this.intense});
+
+  final double progress;
+  final Color color;
+  final bool intense;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final count = intense ? 42 : 18;
+    final width = math.max(size.width, 1.0);
+    final height = math.max(size.height, 1.0);
+    for (var i = 0; i < count; i++) {
+      final orbit = (i * 41.0) % width;
+      final x = (orbit + progress * (intense ? 260 : 120)) % width;
+      final wave = math.sin(progress * math.pi * 2 + i * 0.7);
+      final y = ((i * 67.0) % height) + wave * (intense ? 28 : 12);
+      final radius = intense ? 2.5 + (i % 5) * 1.3 : 1.8 + (i % 3);
+      final alpha = intense ? 0.18 + (i % 4) * 0.08 : 0.12 + (i % 3) * 0.05;
+      canvas.drawCircle(Offset(x, y % height), radius, Paint()..color = color.withValues(alpha: alpha));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CasinoParticlePainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color || oldDelegate.intense != intense;
+  }
+}
+
+class ResultSpotlight extends StatelessWidget {
+  const ResultSpotlight({required this.title, required this.value, required this.color, super.key});
+
+  final String title;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 280),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: 0.84),
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: color.withValues(alpha: 0.76), width: 3),
+        boxShadow: [BoxShadow(color: color.withValues(alpha: 0.34), blurRadius: 34, spreadRadius: 3)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(title.toUpperCase(), style: TextStyle(color: accent.withValues(alpha: 0.92), fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.4)),
+          const SizedBox(height: 6),
+          Text(value, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
+        ],
+      ),
     );
   }
 }
@@ -2117,7 +2463,7 @@ class SlotArtwork extends StatelessWidget {
                   .map(
                     (symbol) => Expanded(
                       child: Container(
-                        height: 70,
+                        height: 88,
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.92),
