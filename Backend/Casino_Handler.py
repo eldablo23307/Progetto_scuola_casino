@@ -210,18 +210,18 @@ class Casino:
             if symbol == config["wild"]:
                 continue
             effective_count = count + wild_count
-            if effective_count >= 9:
+            if effective_count >= 10:
                 symbol_multiplier = config["premium"].get(symbol, 1.1)
-                combo_multiplier = round(symbol_multiplier * (effective_count - 8), 2)
+                combo_multiplier = round(symbol_multiplier * (effective_count - 9), 2)
                 multiplier += combo_multiplier
                 events.append({"type": "combo", "symbol": symbol, "count": effective_count, "multiplier": combo_multiplier})
 
-        if scatter_count >= 5:
+        if scatter_count >= 6:
             bonus_multiplier = random.choice([4, 6, 10, 16, 25])
             multiplier += bonus_multiplier
             events.append({"type": "free_spins", "label": "Pioggia di fulmini", "multiplier": bonus_multiplier})
 
-        if wild_count >= 4:
+        if wild_count >= 5:
             wild_multiplier = random.choice([2, 3, 4, 7])
             multiplier += wild_multiplier
             events.append({"type": "wild", "label": "Moltiplicatore divino", "multiplier": wild_multiplier})

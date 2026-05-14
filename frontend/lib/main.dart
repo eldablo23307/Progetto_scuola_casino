@@ -1193,9 +1193,9 @@ class _GamePlayPageState extends State<GamePlayPage> with SingleTickerProviderSt
       case GameVisual.fruitSlot:
       case GameVisual.crystalSlot:
       case GameVisual.thunderSlot:
-        return const Duration(milliseconds: 7600);
+        return const Duration(milliseconds: 5200);
       case GameVisual.olympusSlot:
-        return const Duration(milliseconds: 9200);
+        return const Duration(milliseconds: 6800);
       case GameVisual.iceFishing:
         return const Duration(milliseconds: 2600);
       case GameVisual.roulette:
@@ -2527,8 +2527,8 @@ class _ClassicSlotReels extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: List.generate(3, (index) {
-        final spinOffset = isPlaying ? math.sin((animation.value * math.pi * 2) + index) * 6 : math.sin(animation.value * math.pi * 2 + index) * 3;
-        final symbol = isPlaying ? fallbackSymbols[index % fallbackSymbols.length] : reels[index];
+        final spinOffset = isPlaying ? math.sin((animation.value * math.pi * 4) + index) * 18 : math.sin(animation.value * math.pi * 2 + index) * 3;
+        final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 5).floor()) % fallbackSymbols.length] : reels[index];
         return Expanded(
           child: Transform.translate(
             offset: Offset(0, spinOffset),
@@ -2541,17 +2541,14 @@ class _ClassicSlotReels extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.22), blurRadius: 18)],
               ),
-              child: _ScrollingSymbolFace(
-                symbol: symbol,
-                fallbackSymbols: fallbackSymbols,
-                isPlaying: isPlaying,
-                animation: animation,
-                panelColor: panelColor,
-                symbolIndex: index,
-                height: 150,
-                largeFontSize: 46,
-                longFontSize: 24,
-                scrollCycles: 9,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(symbol, maxLines: 1, style: TextStyle(color: panelColor, fontSize: symbol.length > 2 ? 24 : 46, fontWeight: FontWeight.w900)),
+                  ),
+                ),
               ),
             ),
           ),
@@ -2579,8 +2576,8 @@ class _OlympusGrid extends StatelessWidget {
         return Row(
           children: List.generate(5, (column) {
             final index = row * 5 + column;
-            final spin = isPlaying ? math.sin(animation.value * math.pi * 2 + index) * 4 : 0.0;
-            final symbol = isPlaying ? fallbackSymbols[index % fallbackSymbols.length] : visibleGrid[row][column];
+            final spin = isPlaying ? math.sin(animation.value * math.pi * 4 + index) * 12 : 0.0;
+            final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 6).floor()) % fallbackSymbols.length] : visibleGrid[row][column];
             return Expanded(
               child: Transform.translate(
                 offset: Offset(0, spin),
@@ -2593,17 +2590,14 @@ class _OlympusGrid extends StatelessWidget {
                     border: Border.all(color: gold.withValues(alpha: 0.42)),
                     boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.16), blurRadius: 12)],
                   ),
-                  child: _ScrollingSymbolFace(
-                    symbol: symbol,
-                    fallbackSymbols: fallbackSymbols,
-                    isPlaying: isPlaying,
-                    animation: animation,
-                    panelColor: panelColor,
-                    symbolIndex: index,
-                    height: 74,
-                    largeFontSize: 30,
-                    longFontSize: 18,
-                    scrollCycles: 7,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(symbol, maxLines: 1, style: TextStyle(color: panelColor, fontSize: symbol.length > 2 ? 18 : 30, fontWeight: FontWeight.w900)),
+                      ),
+                    ),
                   ),
                 ),
               ),
