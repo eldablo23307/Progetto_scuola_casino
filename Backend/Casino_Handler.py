@@ -60,7 +60,16 @@ class Casino:
         "olympus": {
             "game": "Gate of Olympus",
             "symbols": ["BOLT", "CROWN", "GEM", "VASE", "EAGLE", "SHIELD", "ORB"],
-            "premium": {"BOLT": 4, "CROWN": 3, "GEM": 2.5},
+            "symbol_weights": {
+                "BOLT": 1,
+                "CROWN": 2,
+                "GEM": 2,
+                "VASE": 5,
+                "EAGLE": 5,
+                "SHIELD": 5,
+                "ORB": 1,
+            },
+            "premium": {"BOLT": 3, "CROWN": 2.2, "GEM": 1.8},
             "scatter": "BOLT",
             "wild": "ORB",
             "rows": 3,
@@ -180,7 +189,8 @@ class Casino:
         rows = config["rows"]
         columns = config["columns"]
         symbols = config["symbols"]
-        grid = [[random.choice(symbols) for _ in range(columns)] for _ in range(rows)]
+        weights = [config["symbol_weights"].get(symbol, 1) for symbol in symbols]
+        grid = [random.choices(symbols, weights=weights, k=columns) for _ in range(rows)]
         flat = [symbol for row in grid for symbol in row]
         counts = {symbol: flat.count(symbol) for symbol in set(flat)}
 
@@ -194,25 +204,25 @@ class Casino:
                 continue
             effective_count = count + wild_count
             if effective_count >= 10:
-                symbol_multiplier = config["premium"].get(symbol, 1.4)
-                combo_multiplier = round(symbol_multiplier * (effective_count - 8), 2)
+                symbol_multiplier = config["premium"].get(symbol, 1.1)
+                combo_multiplier = round(symbol_multiplier * (effective_count - 9), 2)
                 multiplier += combo_multiplier
                 events.append({"type": "combo", "symbol": symbol, "count": effective_count, "multiplier": combo_multiplier})
 
-        if scatter_count >= 5:
-            bonus_multiplier = random.choice([5, 8, 12, 20, 35])
+        if scatter_count >= 6:
+            bonus_multiplier = random.choice([4, 6, 10, 16, 25])
             multiplier += bonus_multiplier
             events.append({"type": "free_spins", "label": "Pioggia di fulmini", "multiplier": bonus_multiplier})
 
-        if wild_count >= 4:
-            wild_multiplier = random.choice([2, 3, 5, 10])
+        if wild_count >= 5:
+            wild_multiplier = random.choice([2, 3, 4, 7])
             multiplier += wild_multiplier
             events.append({"type": "wild", "label": "Moltiplicatore divino", "multiplier": wild_multiplier})
 
         cascade_count = 0
         if events:
             cascade_count = random.randint(1, 4)
-            cascade_multiplier = cascade_count * random.choice([1, 1.5, 2, 3])
+            cascade_multiplier = cascade_count * random.choice([0.5, 1, 1.5, 2])
             multiplier += cascade_multiplier
             events.append({"type": "cascade", "label": f"{cascade_count} cascata/e", "multiplier": cascade_multiplier})
 
