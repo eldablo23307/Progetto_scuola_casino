@@ -214,7 +214,7 @@ La roulette estrae un numero da `0` a `36`, assegna il colore e supporta più ti
 - numeri singoli: da `number_0` a `number_36`;
 - gruppi di numeri: `low` (`1-18`), `high` (`19-36`), `dozen_1`, `dozen_2`, `dozen_3`, `column_1`, `column_2`, `column_3`.
 
-Le vincite sono calcolate con moltiplicatori differenti: `2x` per colori rosso/nero, pari/dispari e metà tavolo, `3x` per dozzine/colonne, `14x` per verde e `36x` per numero singolo.
+Le vincite sono calcolate con moltiplicatori differenti: `2x` per colori rosso/nero, pari/dispari e metà tavolo, `3x` per dozzine/colonne, `36x` per verde e numero singolo.
 
 #### `POST /games/ice-fishing/play`
 
@@ -262,7 +262,7 @@ Body JSON richiesto:
 }
 ```
 
-Le slot classiche estraggono tre simboli casuali. Le vincite dipendono da coppie, tris e jackpot, con moltiplicatori differenti in base al tema. `Gate of Olympus` usa invece una griglia `3x5`, possibili eventi multipli, scatter, wild, cascate e animazioni di vincita diverse in base al livello della vincita.
+Le slot classiche estraggono tre simboli casuali. Le vincite dipendono da coppie, tris e jackpot, con moltiplicatori differenti in base al tema. `Gate of Olympus` usa invece una griglia `3x5`, possibili eventi multipli, scatter, wild, cascate e animazioni di vincita diverse in base al livello della vincita. Le soglie di combinazione, scatter e wild sono più alte per rendere la vincita più difficile e proporzionata.
 
 #### `POST /games/blackjack/play`
 
@@ -347,7 +347,7 @@ Oltre alle rotte principali, l'apertura di un gioco avviene tramite una pagina F
 - Chiamata al backend per eseguire la giocata.
 - Aggiornamento del bilancio dopo ogni giocata riuscita.
 - Visualizzazione di payout, profitto, messaggio e dettagli del risultato.
-- Animazioni grafiche più vivaci per roulette, ruota Ice Fishing, slot, Gate of Olympus, Blackjack, effetti particellari e badge di vincita.
+- Animazioni grafiche più vivaci per roulette, ruota Ice Fishing, slot centrate con giro più lento, Gate of Olympus, Blackjack, effetti particellari e badge di vincita.
 - Logout con ritorno alla schermata di login.
 
 ### Giochi disponibili nel frontend
@@ -357,7 +357,7 @@ Oltre alle rotte principali, l'apertura di un gioco avviene tramite una pagina F
 - **Slot Frutta**: slot con simboli frutta e jackpot.
 - **Slot Cristalli**: slot con gemme e moltiplicatori più alti.
 - **Slot Fulmini**: slot ad alta volatilità con moltiplicatori maggiori.
-- **Gate of Olympus**: slot ispirata alle slot a griglia con eventi multipli, cascate, scatter, wild e vincite animate per livello.
+- **Gate of Olympus**: slot ispirata alle slot a griglia con eventi multipli, cascate, scatter, wild, difficoltà di vincita aumentata e vincite animate per livello.
 - **Blackjack**: mano rapida contro il banco con scelta tra stare o chiedere carta.
 
 ### Endpoint usati dal frontend
@@ -451,7 +451,7 @@ Funzionalità già presenti nel codice:
 - aggiornamento del bilancio dopo ogni giocata;
 - interfaccia Flutter con login, registrazione e schermata principale;
 - dashboard Flutter con bilancio aggiornato, ID giocatore e griglia dei giochi;
-- pagine Flutter dedicate alle giocate con animazioni più vivaci, ruota Ice Fishing allineata al risultato, animazioni slot migliorate, Gate of Olympus e riepilogo risultato;
+- pagine Flutter dedicate alle giocate con animazioni più vivaci, ruota Ice Fishing allineata al risultato, slot centrate con giro più lento, Gate of Olympus più difficile e riepilogo risultato;
 - creazione automatica del bilancio account durante la registrazione;
 - test Flutter per login e lista giochi.
 

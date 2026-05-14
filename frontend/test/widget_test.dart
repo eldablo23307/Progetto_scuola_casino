@@ -32,15 +32,4 @@ void main() {
       hasLength(37),
     );
   });
-
-  test('include le nuove puntate della roulette', () {
-    expect(
-      rouletteChoices.map((choice) => choice.value),
-      containsAll(['number_0', 'number_17', 'even', 'odd', 'dozen_1', 'column_3']),
-    );
-    expect(
-      rouletteChoices.where((choice) => choice.value.startsWith('number_')),
-      hasLength(37),
-    );
-  });
 }

@@ -1180,11 +1180,27 @@ class _GamePlayPageState extends State<GamePlayPage> with SingleTickerProviderSt
     super.initState();
     playAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1600),
+      duration: _animationDuration(widget.game.visual),
     );
     session = widget.session;
     if (widget.game.choices.isNotEmpty) {
       selectedChoice = widget.game.choices.first.value;
+    }
+  }
+
+  Duration _animationDuration(GameVisual visual) {
+    switch (visual) {
+      case GameVisual.fruitSlot:
+      case GameVisual.crystalSlot:
+      case GameVisual.thunderSlot:
+        return const Duration(milliseconds: 3200);
+      case GameVisual.olympusSlot:
+        return const Duration(milliseconds: 4200);
+      case GameVisual.iceFishing:
+        return const Duration(milliseconds: 2600);
+      case GameVisual.roulette:
+      case GameVisual.blackjack:
+        return const Duration(milliseconds: 1800);
     }
   }
 
@@ -2257,13 +2273,13 @@ class AnimatedSlotStage extends StatelessWidget {
   List<String> get fallbackSymbols {
     switch (game.visual) {
       case GameVisual.fruitSlot:
-        return ['🍒', '🍋', '7'];
+        return ['CH', 'LM', '7'];
       case GameVisual.crystalSlot:
-        return ['◆', '✦', '✧'];
+        return ['DI', 'RY', 'CR'];
       case GameVisual.thunderSlot:
-        return ['⚡', '★', 'W'];
+        return ['BOLT', 'STAR', 'W'];
       case GameVisual.olympusSlot:
-        return ['⚡', '👑', '💎', '🏺', '🦅'];
+        return ['BOLT', 'CROWN', 'GEM', 'VASE', 'EAGLE'];
       case GameVisual.blackjack:
         return ['A', 'K', 'Q'];
       case GameVisual.roulette:
@@ -2317,19 +2333,23 @@ class AnimatedSlotStage extends StatelessWidget {
                   painter: WinBurstPainter(progress: progress, color: tier == 'mythic' ? const Color(0xFFF472B6) : gold),
                 ),
               ),
-            Positioned(
-              right: 28 + shake,
-              top: game.visual == GameVisual.olympusSlot ? 34 : 58,
-              child: Container(
-                width: game.visual == GameVisual.olympusSlot ? 430 : 340,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [panelColor.withValues(alpha: 0.94), game.colors.last.withValues(alpha: 0.58)]),
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: glow.withValues(alpha: win ? 0.98 : 0.76), width: win ? 6 : 4),
-                  boxShadow: [
-                    BoxShadow(color: glow.withValues(alpha: win ? 0.55 : 0.28), blurRadius: win ? 58 : 34, spreadRadius: win ? 8 : 0),
-                  ],
+            Center(
+              child: Transform.translate(
+                offset: Offset(shake, game.visual == GameVisual.olympusSlot ? -16 : 0),
+                child: Container(
+                  width: game.visual == GameVisual.olympusSlot ? 430 : 340,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [panelColor.withValues(alpha: 0.94), game.colors.last.withValues(alpha: 0.58)]),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: glow.withValues(alpha: win ? 0.98 : 0.76), width: win ? 6 : 4),
+                    boxShadow: [
+                      BoxShadow(color: glow.withValues(alpha: win ? 0.55 : 0.28), blurRadius: win ? 58 : 34, spreadRadius: win ? 8 : 0),
+                    ],
+                  ),
+                  child: game.visual == GameVisual.olympusSlot
+                      ? _OlympusGrid(grid: grid, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor)
+                      : _ClassicSlotReels(reels: reels, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor),
                 ),
                 child: game.visual == GameVisual.olympusSlot
                     ? _OlympusGrid(grid: grid, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor)
@@ -2397,8 +2417,8 @@ class _ClassicSlotReels extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: List.generate(3, (index) {
-        final spinOffset = isPlaying ? math.sin((animation.value * math.pi * 14) + index) * 28 : math.sin(animation.value * math.pi * 2 + index) * 3;
-        final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 18).floor()) % fallbackSymbols.length] : reels[index];
+        final spinOffset = isPlaying ? math.sin((animation.value * math.pi * 8) + index) * 28 : math.sin(animation.value * math.pi * 2 + index) * 3;
+        final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 10).floor()) % fallbackSymbols.length] : reels[index];
         return Expanded(
           child: Transform.translate(
             offset: Offset(0, spinOffset),
@@ -2411,7 +2431,7 @@ class _ClassicSlotReels extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.22), blurRadius: 18)],
               ),
-              child: Center(child: Text(symbol, style: TextStyle(color: panelColor, fontSize: 46, fontWeight: FontWeight.w900))),
+              child: Center(child: Text(symbol, style: TextStyle(color: panelColor, fontSize: symbol.length > 2 ? 22 : 46, fontWeight: FontWeight.w900))),
             ),
           ),
         );
@@ -2438,8 +2458,8 @@ class _OlympusGrid extends StatelessWidget {
         return Row(
           children: List.generate(5, (column) {
             final index = row * 5 + column;
-            final spin = isPlaying ? math.sin(animation.value * math.pi * 16 + index) * 18 : 0.0;
-            final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 22).floor()) % fallbackSymbols.length] : visibleGrid[row][column];
+            final spin = isPlaying ? math.sin(animation.value * math.pi * 9 + index) * 18 : 0.0;
+            final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 12).floor()) % fallbackSymbols.length] : visibleGrid[row][column];
             return Expanded(
               child: Transform.translate(
                 offset: Offset(0, spin),
@@ -2452,7 +2472,7 @@ class _OlympusGrid extends StatelessWidget {
                     border: Border.all(color: gold.withValues(alpha: 0.42)),
                     boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.16), blurRadius: 12)],
                   ),
-                  child: Center(child: Text(symbol, style: TextStyle(color: panelColor, fontSize: 30, fontWeight: FontWeight.w900))),
+                  child: Center(child: Text(symbol, style: TextStyle(color: panelColor, fontSize: symbol.length > 2 ? 14 : 30, fontWeight: FontWeight.w900))),
                 ),
               ),
             );
@@ -2627,25 +2647,25 @@ class GameArtwork extends StatelessWidget {
         return const IceFishingArtwork();
       case GameVisual.fruitSlot:
         return const SlotArtwork(
-          symbols: ['🍒', '🍋', '7'],
+          symbols: ['CH', 'LM', '7'],
           panelColor: Color(0xFF7F1D1D),
           glowColor: Color(0xFFFFC857),
         );
       case GameVisual.crystalSlot:
         return const SlotArtwork(
-          symbols: ['◆', '✦', '✧'],
+          symbols: ['DI', 'RY', 'CR'],
           panelColor: Color(0xFF312E81),
           glowColor: Color(0xFF22D3EE),
         );
       case GameVisual.thunderSlot:
         return const SlotArtwork(
-          symbols: ['⚡', '★', 'W'],
+          symbols: ['BOLT', 'STAR', 'W'],
           panelColor: Color(0xFF111827),
           glowColor: Color(0xFFFACC15),
         );
       case GameVisual.olympusSlot:
         return const SlotArtwork(
-          symbols: ['⚡', '👑', '💎'],
+          symbols: ['BOLT', 'CROWN', 'GEM'],
           panelColor: Color(0xFF3B0764),
           glowColor: Color(0xFFFACC15),
         );

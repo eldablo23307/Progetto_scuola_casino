@@ -35,23 +35,23 @@ class Casino:
     SLOT_CONFIGS = {
         "fruit": {
             "game": "Slot Frutta",
-            "symbols": ["🍒", "🍋", "🍊", "🍉", "7️⃣"],
-            "jackpot": "7️⃣",
+            "symbols": ["CH", "LM", "OR", "WM", "7"],
+            "jackpot": "7",
             "triple": 8,
             "jackpot_multiplier": 18,
             "pair": 1.5,
         },
         "crystal": {
             "game": "Slot Cristalli",
-            "symbols": ["💎", "🔷", "🔮", "✨", "👑"],
-            "jackpot": "👑",
+            "symbols": ["DI", "RY", "CR", "ST", "CROWN"],
+            "jackpot": "CROWN",
             "triple": 10,
             "jackpot_multiplier": 24,
             "pair": 2,
         },
         "thunder": {
             "game": "Slot Fulmini",
-            "symbols": ["⚡", "🌩️", "⭐", "🔥", "W"],
+            "symbols": ["BOLT", "STORM", "STAR", "FIRE", "W"],
             "jackpot": "W",
             "triple": 12,
             "jackpot_multiplier": 30,
@@ -59,10 +59,10 @@ class Casino:
         },
         "olympus": {
             "game": "Gate of Olympus",
-            "symbols": ["⚡", "👑", "💎", "🏺", "🦅", "🛡️", "🧿"],
-            "premium": {"⚡": 4, "👑": 3, "💎": 2.5},
-            "scatter": "⚡",
-            "wild": "🧿",
+            "symbols": ["BOLT", "CROWN", "GEM", "VASE", "EAGLE", "SHIELD", "ORB"],
+            "premium": {"BOLT": 4, "CROWN": 3, "GEM": 2.5},
+            "scatter": "BOLT",
+            "wild": "ORB",
             "rows": 3,
             "columns": 5,
         },
@@ -102,7 +102,7 @@ class Casino:
         color_bets = {
             "red": {"label": "Rosso", "type": "colore", "multiplier": 2, "matcher": lambda number, color: color == "red"},
             "black": {"label": "Nero", "type": "colore", "multiplier": 2, "matcher": lambda number, color: color == "black"},
-            "green": {"label": "Verde", "type": "colore", "multiplier": 14, "matcher": lambda number, color: color == "green"},
+            "green": {"label": "Verde", "type": "colore", "multiplier": 36, "matcher": lambda number, color: color == "green"},
         }
         if choice in color_bets:
             return color_bets[choice]
@@ -193,18 +193,18 @@ class Casino:
             if symbol == config["wild"]:
                 continue
             effective_count = count + wild_count
-            if effective_count >= 8:
+            if effective_count >= 10:
                 symbol_multiplier = config["premium"].get(symbol, 1.4)
-                combo_multiplier = round(symbol_multiplier * (effective_count - 6), 2)
+                combo_multiplier = round(symbol_multiplier * (effective_count - 8), 2)
                 multiplier += combo_multiplier
                 events.append({"type": "combo", "symbol": symbol, "count": effective_count, "multiplier": combo_multiplier})
 
-        if scatter_count >= 3:
+        if scatter_count >= 5:
             bonus_multiplier = random.choice([5, 8, 12, 20, 35])
             multiplier += bonus_multiplier
             events.append({"type": "free_spins", "label": "Pioggia di fulmini", "multiplier": bonus_multiplier})
 
-        if wild_count >= 2:
+        if wild_count >= 4:
             wild_multiplier = random.choice([2, 3, 5, 10])
             multiplier += wild_multiplier
             events.append({"type": "wild", "label": "Moltiplicatore divino", "multiplier": wild_multiplier})
