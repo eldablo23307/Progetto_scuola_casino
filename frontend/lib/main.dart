@@ -2364,6 +2364,9 @@ class AnimatedSlotStage extends StatelessWidget {
                     panelColor: panelColor,
                   ),
                 ),
+                child: game.visual == GameVisual.olympusSlot
+                    ? _OlympusGrid(grid: grid, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor)
+                    : _ClassicSlotReels(reels: reels, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor),
               ),
             ),
             Positioned(
