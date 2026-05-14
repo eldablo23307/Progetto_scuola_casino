@@ -205,13 +205,14 @@ Body JSON richiesto:
 }
 ```
 
-Scelte valide:
+La roulette estrae un numero da `0` a `36`, assegna il colore e supporta più tipi di puntata:
 
-- `red`;
-- `black`;
-- `green`.
+- colori: `red`, `black`, `green`;
+- pari/dispari: `even`, `odd`;
+- numeri singoli: da `number_0` a `number_36`;
+- gruppi di numeri: `low` (`1-18`), `high` (`19-36`), `dozen_1`, `dozen_2`, `dozen_3`, `column_1`, `column_2`, `column_3`.
 
-La roulette estrae un numero da `0` a `36`, assegna il colore e paga `2x` su rosso/nero oppure `14x` sul verde.
+Le vincite sono calcolate con moltiplicatori differenti: `2x` per colori rosso/nero, pari/dispari e metà tavolo, `3x` per dozzine/colonne, `14x` per verde e `36x` per numero singolo.
 
 #### `POST /games/ice-fishing/play`
 
@@ -277,9 +278,11 @@ Esempio:
     "number": 18,
     "color": "red",
     "choice": "red",
+    "choiceLabel": "Rosso",
+    "betType": "colore",
     "multiplier": 2
   },
-  "message": "La pallina si ferma su 18 red."
+  "message": "La pallina si ferma su 18 red. Giocata: Rosso."
 }
 ```
 
@@ -325,7 +328,7 @@ Oltre alle rotte principali, l'apertura di un gioco avviene tramite una pagina F
 
 ### Giochi disponibili nel frontend
 
-- **Roulette**: scelta tra rosso, nero e verde.
+- **Roulette**: scelta tra colori, numeri singoli `0-36`, pari/dispari e gruppi di numeri come metà tavolo, dozzine e colonne.
 - **Ice Fishing**: ruota con segmenti numerici e bonus `Coin Flip`, `Pachinko`, `Ice Bonus`.
 - **Slot Frutta**: slot con simboli frutta e jackpot.
 - **Slot Cristalli**: slot con gemme e moltiplicatori più alti.
