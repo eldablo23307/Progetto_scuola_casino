@@ -392,7 +392,7 @@ class _LoginFormState extends State<LoginForm> {
         ),
         if (errorMessage != null) ...[
           const SizedBox(height: 14),
-          Text(errorMessage!, style: const TextStyle(color: Colors.redAccent)),
+          Text(errorMessage ?? '', style: const TextStyle(color: Colors.redAccent)),
         ],
         const SizedBox(height: 24),
         PrimaryButton(
@@ -564,7 +564,7 @@ class _RegisterFormState extends State<RegisterForm> {
         ],
         if (errorMessage != null) ...[
           const SizedBox(height: 14),
-          Text(errorMessage!, style: const TextStyle(color: Colors.redAccent)),
+          Text(errorMessage ?? '', style: const TextStyle(color: Colors.redAccent)),
         ],
         const SizedBox(height: 24),
         PrimaryButton(
@@ -734,7 +734,7 @@ class _MainAppState extends State<MainApp> {
 
     if (response.statusCode != 200) {
       if (initialSession != null) {
-        return initialSession!;
+        return initialSession as UserSession;
       }
       throw Exception('Dati utente non disponibili');
     }
@@ -1229,8 +1229,10 @@ class _GamePlayPageState extends State<GamePlayPage> with SingleTickerProviderSt
       final body = <String, Object>{
         'id_giocatore': session.playerId,
         'bet': bet,
-        if (widget.game.needsChoice) 'choice': selectedChoice ?? '',
       };
+      if (widget.game.needsChoice) {
+        body['choice'] = selectedChoice ?? '';
+      }
       final response = await http.post(
         Uri.parse('$apiBaseUrl${widget.game.apiPath}'),
         headers: const {'Content-Type': 'application/json; charset=UTF-8'},
@@ -1471,6 +1473,7 @@ class GameControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentOutcome = outcome;
     return AuthCard(
       children: [
         InfoPill(
@@ -1520,11 +1523,11 @@ class GameControls extends StatelessWidget {
         PrimaryButton(label: 'Gioca', isLoading: isPlaying, onPressed: onPlay),
         if (errorMessage != null) ...[
           const SizedBox(height: 14),
-          Text(errorMessage!, style: const TextStyle(color: Colors.redAccent)),
+          Text(errorMessage ?? '', style: const TextStyle(color: Colors.redAccent)),
         ],
-        if (outcome != null) ...[
+        if (currentOutcome != null) ...[
           const SizedBox(height: 20),
-          OutcomeCard(outcome: outcome!),
+          OutcomeCard(outcome: currentOutcome),
         ],
       ],
     );
@@ -2100,7 +2103,7 @@ class AnimatedIceFishingStage extends StatelessWidget {
                 top: 52,
                 child: ResultSpotlight(
                   title: isSpecial ? 'Bonus speciale!' : 'Settore pescato',
-                  value: bonus == null ? '${outcome!.result['segmentLabel']}' : '${bonus['label']} • ${bonus['multiplier']}x',
+                  value: bonus == null ? '${outcome?.result['segmentLabel']}' : '${bonus['label']} • ${bonus['multiplier']}x',
                   color: isSpecial ? gold : const Color(0xFF67E8F9),
                 ),
               ),
@@ -2108,7 +2111,7 @@ class AnimatedIceFishingStage extends StatelessWidget {
               Positioned(
                 left: 270,
                 top: 118,
-                child: IceSpecialEffect(segment: segment!, bonus: bonus, progress: progress),
+                child: IceSpecialEffect(segment: segment ?? '', bonus: bonus, progress: progress),
               ),
           ],
         );
@@ -2126,16 +2129,21 @@ class IceSpecialEffect extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final icon = switch (segment) {
-      'coin_flip' => Icons.currency_exchange_rounded,
-      'pachinko' => Icons.sports_baseball_rounded,
-      _ => Icons.phishing_rounded,
-    };
-    final title = switch (segment) {
-      'coin_flip' => 'COIN FLIP',
-      'pachinko' => 'PACHINKO',
-      _ => 'ICE BONUS',
-    };
+    IconData icon;
+    String title;
+    switch (segment) {
+      case 'coin_flip':
+        icon = Icons.currency_exchange_rounded;
+        title = 'COIN FLIP';
+        break;
+      case 'pachinko':
+        icon = Icons.sports_baseball_rounded;
+        title = 'PACHINKO';
+        break;
+      default:
+        icon = Icons.phishing_rounded;
+        title = 'ICE BONUS';
+    }
     return Transform.scale(
       scale: 1 + math.sin(progress * math.pi * 2).abs() * 0.08,
       child: Container(
@@ -2155,7 +2163,7 @@ class IceSpecialEffect extends StatelessWidget {
             Text(title, style: const TextStyle(color: primary, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
             if (bonus != null) ...[
               const SizedBox(height: 6),
-              Text('${bonus!['multiplier']}x', style: const TextStyle(color: primary, fontSize: 38, fontWeight: FontWeight.w900)),
+              Text('${bonus['multiplier']}x', style: const TextStyle(color: primary, fontSize: 38, fontWeight: FontWeight.w900)),
             ],
           ],
         ),
@@ -2176,7 +2184,7 @@ class AnimatedBlackjackStage extends StatelessWidget {
   Widget build(BuildContext context) {
     final player = (outcome?.result['playerHand'] as List?)?.map((card) => card.toString()).toList() ?? ['A', '?'];
     final dealer = (outcome?.result['dealerHand'] as List?)?.map((card) => card.toString()).toList() ?? ['?', 'K'];
-    final win = outcome != null && outcome!.profit > 0;
+    final win = (outcome?.profit ?? 0) > 0;
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
@@ -2202,7 +2210,7 @@ class AnimatedBlackjackStage extends StatelessWidget {
                 top: 52,
                 child: ResultSpotlight(
                   title: win ? 'Mano vincente!' : 'Mano conclusa',
-                  value: '${outcome!.result['playerScore']} vs ${outcome!.result['dealerScore']}',
+                  value: '${outcome?.result['playerScore']} vs ${outcome?.result['dealerScore']}',
                   color: win ? gold : const Color(0xFF10B981),
                 ),
               ),
@@ -2316,7 +2324,7 @@ class AnimatedSlotStage extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         final progress = animation.value;
-        final win = outcome != null && outcome!.profit > 0;
+        final win = (outcome?.profit ?? 0) > 0;
         final glow = win ? gold : game.colors.first;
         final shake = win ? math.sin(progress * math.pi * 18) * 5 : 0.0;
         return Stack(
@@ -2347,9 +2355,14 @@ class AnimatedSlotStage extends StatelessWidget {
                       BoxShadow(color: glow.withValues(alpha: win ? 0.55 : 0.28), blurRadius: win ? 58 : 34, spreadRadius: win ? 8 : 0),
                     ],
                   ),
-                  child: game.visual == GameVisual.olympusSlot
-                      ? _OlympusGrid(grid: grid, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor)
-                      : _ClassicSlotReels(reels: reels, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor),
+                  child: _slotContent(
+                    grid: grid,
+                    reels: reels,
+                    fallbackSymbols: fallbackSymbols,
+                    isPlaying: isPlaying,
+                    animation: animation,
+                    panelColor: panelColor,
+                  ),
                 ),
                 child: game.visual == GameVisual.olympusSlot
                     ? _OlympusGrid(grid: grid, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor)
@@ -2374,7 +2387,7 @@ class AnimatedSlotStage extends StatelessWidget {
                 top: 52,
                 child: ResultSpotlight(
                   title: win ? _winTitle(tier) : 'Rulli fermati',
-                  value: game.visual == GameVisual.olympusSlot ? '${outcome!.result['multiplier']}x • ${events.length} eventi' : reels.join('  '),
+                  value: _slotResultValue(reels, events),
                   color: win ? glow : game.colors.first,
                 ),
               ),
@@ -2388,6 +2401,21 @@ class AnimatedSlotStage extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _slotContent({required List<List<String>>? grid, required List<String> reels, required List<String> fallbackSymbols, required bool isPlaying, required Animation<double> animation, required Color panelColor}) {
+    if (game.visual == GameVisual.olympusSlot) {
+      return _OlympusGrid(grid: grid, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor);
+    }
+    return _ClassicSlotReels(reels: reels, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor);
+  }
+
+  String _slotResultValue(List<String> reels, List events) {
+    if (game.visual == GameVisual.olympusSlot) {
+      final multiplier = outcome?.result['multiplier'] ?? 0;
+      return '${multiplier}x • ${events.length} eventi';
+    }
+    return reels.join('  ');
   }
 
   String _winTitle(String tier) {
