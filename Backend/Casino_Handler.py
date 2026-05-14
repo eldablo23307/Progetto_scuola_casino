@@ -61,9 +61,7 @@ class Casino:
 
     def roulette(self, bet: float, choice: str) -> dict:
         choice = choice.lower().strip()
-        allowed = {"red", "black", "green"}
-        if choice not in allowed:
-            raise ValueError("Scelta roulette non valida")
+        bet_data = self._roulette_bet(choice)
 
         number = random.randint(0, 36)
         if number == 0:
@@ -73,15 +71,68 @@ class Casino:
         else:
             color = "black"
 
-        multiplier = 14 if color == "green" else 2
-        payout = bet * multiplier if choice == color else 0
+        won = bet_data["matcher"](number, color)
+        multiplier = bet_data["multiplier"] if won else 0
+        payout = bet * multiplier
         return self._result(
             "Roulette",
             bet,
             payout,
-            {"number": number, "color": color, "choice": choice, "multiplier": multiplier if choice == color else 0},
-            f"La pallina si ferma su {number} {color}.",
+            {
+                "number": number,
+                "color": color,
+                "choice": choice,
+                "choiceLabel": bet_data["label"],
+                "betType": bet_data["type"],
+                "multiplier": multiplier,
+            },
+            f"La pallina si ferma su {number} {color}. Giocata: {bet_data['label']}.",
         )
+
+    def _roulette_bet(self, choice: str) -> dict:
+        color_bets = {
+            "red": {"label": "Rosso", "type": "colore", "multiplier": 2, "matcher": lambda number, color: color == "red"},
+            "black": {"label": "Nero", "type": "colore", "multiplier": 2, "matcher": lambda number, color: color == "black"},
+            "green": {"label": "Verde", "type": "colore", "multiplier": 14, "matcher": lambda number, color: color == "green"},
+        }
+        if choice in color_bets:
+            return color_bets[choice]
+
+        parity_bets = {
+            "even": {"label": "Pari", "type": "pari/dispari", "matcher": lambda number, color: number != 0 and number % 2 == 0},
+            "odd": {"label": "Dispari", "type": "pari/dispari", "matcher": lambda number, color: number % 2 == 1},
+        }
+        if choice in parity_bets:
+            return {**parity_bets[choice], "multiplier": 2}
+
+        range_bets = {
+            "low": {"label": "1-18", "type": "pezzo", "matcher": lambda number, color: 1 <= number <= 18},
+            "high": {"label": "19-36", "type": "pezzo", "matcher": lambda number, color: 19 <= number <= 36},
+            "dozen_1": {"label": "1ª dozzina (1-12)", "type": "pezzo", "matcher": lambda number, color: 1 <= number <= 12},
+            "dozen_2": {"label": "2ª dozzina (13-24)", "type": "pezzo", "matcher": lambda number, color: 13 <= number <= 24},
+            "dozen_3": {"label": "3ª dozzina (25-36)", "type": "pezzo", "matcher": lambda number, color: 25 <= number <= 36},
+            "column_1": {"label": "Colonna 1", "type": "pezzo", "matcher": lambda number, color: number != 0 and number % 3 == 1},
+            "column_2": {"label": "Colonna 2", "type": "pezzo", "matcher": lambda number, color: number != 0 and number % 3 == 2},
+            "column_3": {"label": "Colonna 3", "type": "pezzo", "matcher": lambda number, color: number != 0 and number % 3 == 0},
+        }
+        if choice in range_bets:
+            multiplier = 2 if choice in {"low", "high"} else 3
+            return {**range_bets[choice], "multiplier": multiplier}
+
+        if choice.startswith("number_"):
+            try:
+                selected_number = int(choice.split("_", 1)[1])
+            except ValueError as exc:
+                raise ValueError("Numero roulette non valido") from exc
+            if 0 <= selected_number <= 36:
+                return {
+                    "label": f"Numero {selected_number}",
+                    "type": "numero singolo",
+                    "multiplier": 36,
+                    "matcher": lambda number, color: number == selected_number,
+                }
+
+        raise ValueError("Scelta roulette non valida")
 
     def slot(self, theme: str, bet: float) -> dict:
         if theme not in self.SLOT_CONFIGS:

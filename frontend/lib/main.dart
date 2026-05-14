@@ -9,19 +9,68 @@ const Color secondary = Color(0xFF593F62);
 const Color accent = Color(0xFFA5C4D4);
 const Color gold = Color(0xFFFFC857);
 const String apiBaseUrl = 'http://127.0.0.1:5000';
+const List<GameChoice> rouletteChoices = [
+  GameChoice(label: 'Rosso', value: 'red'),
+  GameChoice(label: 'Nero', value: 'black'),
+  GameChoice(label: 'Verde', value: 'green'),
+  GameChoice(label: 'Pari', value: 'even'),
+  GameChoice(label: 'Dispari', value: 'odd'),
+  GameChoice(label: '1-18', value: 'low'),
+  GameChoice(label: '19-36', value: 'high'),
+  GameChoice(label: '1ª dozzina', value: 'dozen_1'),
+  GameChoice(label: '2ª dozzina', value: 'dozen_2'),
+  GameChoice(label: '3ª dozzina', value: 'dozen_3'),
+  GameChoice(label: 'Colonna 1', value: 'column_1'),
+  GameChoice(label: 'Colonna 2', value: 'column_2'),
+  GameChoice(label: 'Colonna 3', value: 'column_3'),
+  GameChoice(label: '0', value: 'number_0'),
+  GameChoice(label: '1', value: 'number_1'),
+  GameChoice(label: '2', value: 'number_2'),
+  GameChoice(label: '3', value: 'number_3'),
+  GameChoice(label: '4', value: 'number_4'),
+  GameChoice(label: '5', value: 'number_5'),
+  GameChoice(label: '6', value: 'number_6'),
+  GameChoice(label: '7', value: 'number_7'),
+  GameChoice(label: '8', value: 'number_8'),
+  GameChoice(label: '9', value: 'number_9'),
+  GameChoice(label: '10', value: 'number_10'),
+  GameChoice(label: '11', value: 'number_11'),
+  GameChoice(label: '12', value: 'number_12'),
+  GameChoice(label: '13', value: 'number_13'),
+  GameChoice(label: '14', value: 'number_14'),
+  GameChoice(label: '15', value: 'number_15'),
+  GameChoice(label: '16', value: 'number_16'),
+  GameChoice(label: '17', value: 'number_17'),
+  GameChoice(label: '18', value: 'number_18'),
+  GameChoice(label: '19', value: 'number_19'),
+  GameChoice(label: '20', value: 'number_20'),
+  GameChoice(label: '21', value: 'number_21'),
+  GameChoice(label: '22', value: 'number_22'),
+  GameChoice(label: '23', value: 'number_23'),
+  GameChoice(label: '24', value: 'number_24'),
+  GameChoice(label: '25', value: 'number_25'),
+  GameChoice(label: '26', value: 'number_26'),
+  GameChoice(label: '27', value: 'number_27'),
+  GameChoice(label: '28', value: 'number_28'),
+  GameChoice(label: '29', value: 'number_29'),
+  GameChoice(label: '30', value: 'number_30'),
+  GameChoice(label: '31', value: 'number_31'),
+  GameChoice(label: '32', value: 'number_32'),
+  GameChoice(label: '33', value: 'number_33'),
+  GameChoice(label: '34', value: 'number_34'),
+  GameChoice(label: '35', value: 'number_35'),
+  GameChoice(label: '36', value: 'number_36'),
+];
+
 const List<GameDefinition> casinoGames = [
   GameDefinition(
     title: 'Roulette',
-    subtitle: 'Punta sul colore vincente',
+    subtitle: 'Punta su colori, numeri, pari/dispari o gruppi',
     icon: Icons.radar_rounded,
     visual: GameVisual.roulette,
     apiPath: '/games/roulette/play',
     imageUrl: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=900&q=80',
-    choices: [
-      GameChoice(label: 'Rosso', value: 'red'),
-      GameChoice(label: 'Nero', value: 'black'),
-      GameChoice(label: 'Verde', value: 'green'),
-    ],
+    choices: rouletteChoices,
     colors: [Color(0xFFE53935), Color(0xFF111827)],
   ),
   GameDefinition(
@@ -1403,7 +1452,11 @@ class GameControls extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              game.visual == GameVisual.iceFishing ? 'Punta sul settore della ruota' : 'Scegli una giocata',
+              game.visual == GameVisual.iceFishing
+                  ? 'Punta sul settore della ruota'
+                  : game.visual == GameVisual.roulette
+                      ? 'Scegli colore, numero o gruppo'
+                      : 'Scegli una giocata',
               style: TextStyle(color: accent.withValues(alpha: 0.82), fontWeight: FontWeight.w700),
             ),
           ),
@@ -1480,7 +1533,8 @@ class OutcomeCard extends StatelessWidget {
       return "Rulli: ${(result['reels'] as List).join('  ')}";
     }
     if (result.containsKey('number')) {
-      return "Numero: ${result['number']} - Colore: ${result['color']}";
+      return "Numero: ${result['number']} - Colore: ${result['color']} - "
+          "Giocata: ${result['choiceLabel'] ?? result['choice']}";
     }
     if (result.containsKey('segmentLabel')) {
       final bonus = result['bonus'] as Map<String, dynamic>?;
