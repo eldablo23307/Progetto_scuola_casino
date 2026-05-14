@@ -1500,7 +1500,7 @@ class GameControls extends StatelessWidget {
                       : game.visual == GameVisual.blackjack
                           ? 'Scegli la tua azione'
                           : 'Scegli una giocata',
-              style: TextStyle(color: accent.withOpacity(0.82), fontWeight: FontWeight.w700),
+              style: TextStyle(color: accent.withValues(alpha: 0.82), fontWeight: FontWeight.w700),
             ),
           ),
           const SizedBox(height: 10),
@@ -2251,7 +2251,7 @@ class _BlackjackHand extends StatelessWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: gold, width: 2),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.32), blurRadius: 18, offset: const Offset(0, 10))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.32), blurRadius: 18, offset: const Offset(0, 10))],
                   ),
                   child: Center(child: Text(cards[index], style: TextStyle(color: color, fontSize: 30, fontWeight: FontWeight.w900))),
                 ),
@@ -2348,11 +2348,11 @@ class AnimatedSlotStage extends StatelessWidget {
                   width: game.visual == GameVisual.olympusSlot ? 430 : 340,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [panelColor.withOpacity(0.94), game.colors.last.withOpacity(0.58)]),
+                    gradient: LinearGradient(colors: [panelColor.withValues(alpha: 0.94), game.colors.last.withValues(alpha: 0.58)]),
                     borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: glow.withOpacity(win ? 0.98 : 0.76), width: win ? 6 : 4),
+                    border: Border.all(color: glow.withValues(alpha: win ? 0.98 : 0.76), width: win ? 6 : 4),
                     boxShadow: [
-                      BoxShadow(color: glow.withOpacity(win ? 0.55 : 0.28), blurRadius: win ? 58 : 34, spreadRadius: win ? 8 : 0),
+                      BoxShadow(color: glow.withValues(alpha: win ? 0.55 : 0.28), blurRadius: win ? 58 : 34, spreadRadius: win ? 8 : 0),
                     ],
                   ),
                   child: _slotContent(
@@ -2364,6 +2364,9 @@ class AnimatedSlotStage extends StatelessWidget {
                     panelColor: panelColor,
                   ),
                 ),
+                child: game.visual == GameVisual.olympusSlot
+                    ? _OlympusGrid(grid: grid, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor)
+                    : _ClassicSlotReels(reels: reels, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor),
               ),
             ),
             Positioned(
@@ -2374,7 +2377,7 @@ class AnimatedSlotStage extends StatelessWidget {
                 child: Container(
                   width: 18,
                   height: 88,
-                  decoration: BoxDecoration(color: glow, borderRadius: BorderRadius.circular(99), boxShadow: [BoxShadow(color: glow.withOpacity(0.5), blurRadius: 20)]),
+                  decoration: BoxDecoration(color: glow, borderRadius: BorderRadius.circular(99), boxShadow: [BoxShadow(color: glow.withValues(alpha: 0.5), blurRadius: 20)]),
                 ),
               ),
             ),
@@ -2452,9 +2455,9 @@ class _ClassicSlotReels extends StatelessWidget {
               height: 150,
               margin: const EdgeInsets.symmetric(horizontal: 5),
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [Colors.white.withOpacity(0.98), Colors.white.withOpacity(0.74)]),
+                gradient: LinearGradient(colors: [Colors.white.withValues(alpha: 0.98), Colors.white.withValues(alpha: 0.74)]),
                 borderRadius: BorderRadius.circular(18),
-                boxShadow: [BoxShadow(color: Colors.white.withOpacity(0.22), blurRadius: 18)],
+                boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.22), blurRadius: 18)],
               ),
               child: Center(child: Text(symbol, style: TextStyle(color: panelColor, fontSize: symbol.length > 2 ? 22 : 46, fontWeight: FontWeight.w900))),
             ),
@@ -2492,10 +2495,10 @@ class _OlympusGrid extends StatelessWidget {
                   height: 74,
                   margin: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: gold.withOpacity(0.42)),
-                    boxShadow: [BoxShadow(color: gold.withOpacity(0.16), blurRadius: 12)],
+                    border: Border.all(color: gold.withValues(alpha: 0.42)),
+                    boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.16), blurRadius: 12)],
                   ),
                   child: Center(child: Text(symbol, style: TextStyle(color: panelColor, fontSize: symbol.length > 2 ? 14 : 30, fontWeight: FontWeight.w900))),
                 ),
@@ -2528,10 +2531,10 @@ class WinEventBadges extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.92),
+              color: color.withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withOpacity(0.82), width: 2),
-              boxShadow: [BoxShadow(color: color.withOpacity(0.4), blurRadius: 24)],
+              border: Border.all(color: Colors.white.withValues(alpha: 0.82), width: 2),
+              boxShadow: [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 24)],
             ),
             child: Text(labels[index].toUpperCase(), style: const TextStyle(color: primary, fontWeight: FontWeight.w900)),
           ),
@@ -2560,7 +2563,7 @@ class WinBurstPainter extends CustomPainter {
         start,
         end,
         Paint()
-          ..color = color.withOpacity(0.18 + (i % 3) * 0.08)
+          ..color = color.withValues(alpha: 0.18 + (i % 3) * 0.08)
           ..strokeWidth = 3 + (i % 4)
           ..strokeCap = StrokeCap.round,
       );
@@ -2710,14 +2713,14 @@ class BlackjackArtwork extends StatelessWidget {
         Positioned.fill(
           child: Container(
             decoration: BoxDecoration(
-              gradient: RadialGradient(colors: [const Color(0xFF047857).withOpacity(0.72), const Color(0xFF022C22).withOpacity(0.92)]),
+              gradient: RadialGradient(colors: [const Color(0xFF047857).withValues(alpha: 0.72), const Color(0xFF022C22).withValues(alpha: 0.92)]),
             ),
           ),
         ),
         Positioned(
           right: 34,
           top: 34,
-          child: Icon(Icons.style_rounded, color: gold.withOpacity(0.5), size: 150),
+          child: Icon(Icons.style_rounded, color: gold.withValues(alpha: 0.5), size: 150),
         ),
         Positioned(
           left: 42,
@@ -2727,8 +2730,8 @@ class BlackjackArtwork extends StatelessWidget {
             height: 150,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: gold.withOpacity(0.42), width: 5),
-              color: Colors.black.withOpacity(0.18),
+              border: Border.all(color: gold.withValues(alpha: 0.42), width: 5),
+              color: Colors.black.withValues(alpha: 0.18),
             ),
           ),
         ),
