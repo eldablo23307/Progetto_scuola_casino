@@ -110,5 +110,17 @@ def play_slot(theme):
     return _play(lambda wager: casino.slot(theme, wager))
 
 
+@app.route("/games/blackjack/play", methods=["POST"])
+def play_blackjack():
+    id_giocatore, bet, data = _game_payload()
+    choice = data.get("choice", "stand")
+    try:
+        return jsonify(db.play_game(id_giocatore, bet, lambda wager: casino.blackjack(wager, choice)))
+    except LookupError:
+        abort(404)
+    except ValueError as exc:
+        abort(400, description=str(exc))
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
