@@ -39,7 +39,8 @@ class Casino:
             "jackpot": "7",
             "triple": 8,
             "jackpot_multiplier": 18,
-            "pair": 1.5,
+            "pair": 1.2,
+            "pair_chance": 0.6,
         },
         "crystal": {
             "game": "Slot Cristalli",
@@ -47,7 +48,8 @@ class Casino:
             "jackpot": "CROWN",
             "triple": 10,
             "jackpot_multiplier": 24,
-            "pair": 2,
+            "pair": 1.6,
+            "pair_chance": 0.55,
         },
         "thunder": {
             "game": "Slot Fulmini",
@@ -55,7 +57,8 @@ class Casino:
             "jackpot": "W",
             "triple": 12,
             "jackpot_multiplier": 30,
-            "pair": 2.5,
+            "pair": 2,
+            "pair_chance": 0.5,
         },
         "olympus": {
             "game": "Gate of Olympus",
@@ -171,9 +174,13 @@ class Casino:
             message = "Jackpot esplosivo!" if symbol == config["jackpot"] else "Tre simboli uguali!"
             win_tier = "jackpot" if symbol == config["jackpot"] else "triple"
         elif max(counts.values()) == 2:
-            multiplier = config["pair"]
-            message = "Coppia vincente!"
-            win_tier = "pair"
+            if random.random() < config.get("pair_chance", 1):
+                multiplier = config["pair"]
+                message = "Coppia vincente!"
+                win_tier = "pair"
+            else:
+                message = "Coppia sfiorata: questa volta non paga."
+                win_tier = "near_miss"
 
         payout = bet * multiplier
         return self._result(
@@ -271,20 +278,32 @@ class Casino:
             events.append("Hai chiesto carta")
 
         player_score = self._blackjack_score(player)
-        if player_score <= 21:
+        dealer_score = self._blackjack_score(dealer)
+        player_natural = len(player) == 2 and player_score == 21
+        dealer_natural = len(dealer) == 2 and dealer_score == 21
+
+        if player_score <= 21 and not player_natural and not dealer_natural:
             while self._blackjack_score(dealer) < 17:
                 dealer.append(deck.pop())
                 events.append("Il banco pesca")
+            dealer_score = self._blackjack_score(dealer)
 
-        dealer_score = self._blackjack_score(dealer)
         if player_score > 21:
             multiplier = 0
             message = "Hai sballato. Vince il banco."
             outcome = "lose"
-        elif len(player) == 2 and player_score == 21:
+        elif player_natural and dealer_natural:
+            multiplier = 1
+            message = "Doppio blackjack: puntata restituita."
+            outcome = "push"
+        elif player_natural:
             multiplier = 2.5
             message = "Blackjack naturale!"
             outcome = "blackjack"
+        elif dealer_natural:
+            multiplier = 0
+            message = "Blackjack del banco."
+            outcome = "lose"
         elif dealer_score > 21 or player_score > dealer_score:
             multiplier = 2
             message = "Hai battuto il banco!"

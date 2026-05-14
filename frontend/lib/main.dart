@@ -1204,6 +1204,10 @@ class _GamePlayPageState extends State<GamePlayPage> with SingleTickerProviderSt
     }
   }
 
+  bool _isSlotVisual(GameVisual visual) {
+    return visual == GameVisual.fruitSlot || visual == GameVisual.crystalSlot || visual == GameVisual.thunderSlot || visual == GameVisual.olympusSlot;
+  }
+
   @override
   void dispose() {
     playAnimationController.dispose();
@@ -1233,11 +1237,18 @@ class _GamePlayPageState extends State<GamePlayPage> with SingleTickerProviderSt
       if (widget.game.needsChoice) {
         body['choice'] = selectedChoice ?? '';
       }
-      final response = await http.post(
+      final responseFuture = http.post(
         Uri.parse('$apiBaseUrl${widget.game.apiPath}'),
         headers: const {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode(body),
       );
+      final response = _isSlotVisual(widget.game.visual)
+          ? (await Future.wait<dynamic>([
+              responseFuture,
+              Future<void>.delayed(_animationDuration(widget.game.visual)),
+            ]))
+              .first as http.Response
+          : await responseFuture;
 
       if (response.statusCode != 200) {
         throw Exception('Giocata non riuscita');
@@ -2427,6 +2438,79 @@ class AnimatedSlotStage extends StatelessWidget {
       default:
         return 'Combinazione vincente';
     }
+  }
+}
+
+class _ScrollingSymbolFace extends StatelessWidget {
+  const _ScrollingSymbolFace({
+    required this.symbol,
+    required this.fallbackSymbols,
+    required this.isPlaying,
+    required this.animation,
+    required this.panelColor,
+    required this.symbolIndex,
+    required this.height,
+    required this.largeFontSize,
+    required this.longFontSize,
+    required this.scrollCycles,
+  });
+
+  final String symbol;
+  final List<String> fallbackSymbols;
+  final bool isPlaying;
+  final Animation<double> animation;
+  final Color panelColor;
+  final int symbolIndex;
+  final double height;
+  final double largeFontSize;
+  final double longFontSize;
+  final int scrollCycles;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isPlaying) {
+      return _symbolText(symbol);
+    }
+
+    final symbols = fallbackSymbols.isEmpty ? [symbol] : fallbackSymbols;
+    final position = animation.value * symbols.length * scrollCycles + symbolIndex * 0.65;
+    final baseIndex = position.floor();
+    final fraction = position - baseIndex;
+    final itemHeight = height * 0.58;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        alignment: Alignment.center,
+        children: List.generate(7, (visibleIndex) {
+          final slotOffset = visibleIndex - 3;
+          final currentSymbol = symbols[(baseIndex + slotOffset) % symbols.length];
+          final distanceFromCenter = (slotOffset - fraction).abs();
+          return Transform.translate(
+            offset: Offset(0, (slotOffset - fraction) * itemHeight),
+            child: Opacity(
+              opacity: (1 - distanceFromCenter * 0.22).clamp(0.18, 1).toDouble(),
+              child: Transform.scale(
+                scale: (1 - distanceFromCenter * 0.08).clamp(0.72, 1).toDouble(),
+                child: _symbolText(currentSymbol),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _symbolText(String value) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(value, maxLines: 1, style: TextStyle(color: panelColor, fontSize: value.length > 2 ? longFontSize : largeFontSize, fontWeight: FontWeight.w900)),
+        ),
+      ),
+    );
   }
 }
 
