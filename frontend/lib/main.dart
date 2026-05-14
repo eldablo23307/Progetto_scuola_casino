@@ -1193,9 +1193,9 @@ class _GamePlayPageState extends State<GamePlayPage> with SingleTickerProviderSt
       case GameVisual.fruitSlot:
       case GameVisual.crystalSlot:
       case GameVisual.thunderSlot:
-        return const Duration(milliseconds: 3200);
+        return const Duration(milliseconds: 5200);
       case GameVisual.olympusSlot:
-        return const Duration(milliseconds: 4200);
+        return const Duration(milliseconds: 6800);
       case GameVisual.iceFishing:
         return const Duration(milliseconds: 2600);
       case GameVisual.roulette:
@@ -2144,6 +2144,7 @@ class IceSpecialEffect extends StatelessWidget {
         icon = Icons.phishing_rounded;
         title = 'ICE BONUS';
     }
+    final bonusData = bonus;
     return Transform.scale(
       scale: 1 + math.sin(progress * math.pi * 2).abs() * 0.08,
       child: Container(
@@ -2161,9 +2162,9 @@ class IceSpecialEffect extends StatelessWidget {
             Icon(icon, color: primary, size: 58),
             const SizedBox(height: 8),
             Text(title, style: const TextStyle(color: primary, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
-            if (bonus != null) ...[
+            if (bonusData != null) ...[
               const SizedBox(height: 6),
-              Text('${bonus['multiplier']}x', style: const TextStyle(color: primary, fontSize: 38, fontWeight: FontWeight.w900)),
+              Text('${bonusData['multiplier']}x', style: const TextStyle(color: primary, fontSize: 38, fontWeight: FontWeight.w900)),
             ],
           ],
         ),
@@ -2287,7 +2288,7 @@ class AnimatedSlotStage extends StatelessWidget {
       case GameVisual.thunderSlot:
         return ['BOLT', 'STAR', 'W'];
       case GameVisual.olympusSlot:
-        return ['BOLT', 'CROWN', 'GEM', 'VASE', 'EAGLE'];
+        return ['BOLT', 'CROWN', 'GEM', 'VASE', 'EAGLE', 'SHIELD', 'ORB'];
       case GameVisual.blackjack:
         return ['A', 'K', 'Q'];
       case GameVisual.roulette:
@@ -2364,9 +2365,6 @@ class AnimatedSlotStage extends StatelessWidget {
                     panelColor: panelColor,
                   ),
                 ),
-                child: game.visual == GameVisual.olympusSlot
-                    ? _OlympusGrid(grid: grid, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor)
-                    : _ClassicSlotReels(reels: reels, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor),
               ),
             ),
             Positioned(
@@ -2445,8 +2443,8 @@ class _ClassicSlotReels extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: List.generate(3, (index) {
-        final spinOffset = isPlaying ? math.sin((animation.value * math.pi * 8) + index) * 28 : math.sin(animation.value * math.pi * 2 + index) * 3;
-        final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 10).floor()) % fallbackSymbols.length] : reels[index];
+        final spinOffset = isPlaying ? math.sin((animation.value * math.pi * 4) + index) * 18 : math.sin(animation.value * math.pi * 2 + index) * 3;
+        final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 5).floor()) % fallbackSymbols.length] : reels[index];
         return Expanded(
           child: Transform.translate(
             offset: Offset(0, spinOffset),
@@ -2459,7 +2457,15 @@ class _ClassicSlotReels extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.22), blurRadius: 18)],
               ),
-              child: Center(child: Text(symbol, style: TextStyle(color: panelColor, fontSize: symbol.length > 2 ? 22 : 46, fontWeight: FontWeight.w900))),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(symbol, maxLines: 1, style: TextStyle(color: panelColor, fontSize: symbol.length > 2 ? 24 : 46, fontWeight: FontWeight.w900)),
+                  ),
+                ),
+              ),
             ),
           ),
         );
@@ -2486,8 +2492,8 @@ class _OlympusGrid extends StatelessWidget {
         return Row(
           children: List.generate(5, (column) {
             final index = row * 5 + column;
-            final spin = isPlaying ? math.sin(animation.value * math.pi * 9 + index) * 18 : 0.0;
-            final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 12).floor()) % fallbackSymbols.length] : visibleGrid[row][column];
+            final spin = isPlaying ? math.sin(animation.value * math.pi * 4 + index) * 12 : 0.0;
+            final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 6).floor()) % fallbackSymbols.length] : visibleGrid[row][column];
             return Expanded(
               child: Transform.translate(
                 offset: Offset(0, spin),
@@ -2500,7 +2506,15 @@ class _OlympusGrid extends StatelessWidget {
                     border: Border.all(color: gold.withValues(alpha: 0.42)),
                     boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.16), blurRadius: 12)],
                   ),
-                  child: Center(child: Text(symbol, style: TextStyle(color: panelColor, fontSize: symbol.length > 2 ? 14 : 30, fontWeight: FontWeight.w900))),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(symbol, maxLines: 1, style: TextStyle(color: panelColor, fontSize: symbol.length > 2 ? 18 : 30, fontWeight: FontWeight.w900)),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             );
