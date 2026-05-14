@@ -9,68 +9,19 @@ const Color secondary = Color(0xFF593F62);
 const Color accent = Color(0xFFA5C4D4);
 const Color gold = Color(0xFFFFC857);
 const String apiBaseUrl = 'http://127.0.0.1:5000';
-const List<GameChoice> rouletteChoices = [
-  GameChoice(label: 'Rosso', value: 'red'),
-  GameChoice(label: 'Nero', value: 'black'),
-  GameChoice(label: 'Verde', value: 'green'),
-  GameChoice(label: 'Pari', value: 'even'),
-  GameChoice(label: 'Dispari', value: 'odd'),
-  GameChoice(label: '1-18', value: 'low'),
-  GameChoice(label: '19-36', value: 'high'),
-  GameChoice(label: '1ª dozzina', value: 'dozen_1'),
-  GameChoice(label: '2ª dozzina', value: 'dozen_2'),
-  GameChoice(label: '3ª dozzina', value: 'dozen_3'),
-  GameChoice(label: 'Colonna 1', value: 'column_1'),
-  GameChoice(label: 'Colonna 2', value: 'column_2'),
-  GameChoice(label: 'Colonna 3', value: 'column_3'),
-  GameChoice(label: '0', value: 'number_0'),
-  GameChoice(label: '1', value: 'number_1'),
-  GameChoice(label: '2', value: 'number_2'),
-  GameChoice(label: '3', value: 'number_3'),
-  GameChoice(label: '4', value: 'number_4'),
-  GameChoice(label: '5', value: 'number_5'),
-  GameChoice(label: '6', value: 'number_6'),
-  GameChoice(label: '7', value: 'number_7'),
-  GameChoice(label: '8', value: 'number_8'),
-  GameChoice(label: '9', value: 'number_9'),
-  GameChoice(label: '10', value: 'number_10'),
-  GameChoice(label: '11', value: 'number_11'),
-  GameChoice(label: '12', value: 'number_12'),
-  GameChoice(label: '13', value: 'number_13'),
-  GameChoice(label: '14', value: 'number_14'),
-  GameChoice(label: '15', value: 'number_15'),
-  GameChoice(label: '16', value: 'number_16'),
-  GameChoice(label: '17', value: 'number_17'),
-  GameChoice(label: '18', value: 'number_18'),
-  GameChoice(label: '19', value: 'number_19'),
-  GameChoice(label: '20', value: 'number_20'),
-  GameChoice(label: '21', value: 'number_21'),
-  GameChoice(label: '22', value: 'number_22'),
-  GameChoice(label: '23', value: 'number_23'),
-  GameChoice(label: '24', value: 'number_24'),
-  GameChoice(label: '25', value: 'number_25'),
-  GameChoice(label: '26', value: 'number_26'),
-  GameChoice(label: '27', value: 'number_27'),
-  GameChoice(label: '28', value: 'number_28'),
-  GameChoice(label: '29', value: 'number_29'),
-  GameChoice(label: '30', value: 'number_30'),
-  GameChoice(label: '31', value: 'number_31'),
-  GameChoice(label: '32', value: 'number_32'),
-  GameChoice(label: '33', value: 'number_33'),
-  GameChoice(label: '34', value: 'number_34'),
-  GameChoice(label: '35', value: 'number_35'),
-  GameChoice(label: '36', value: 'number_36'),
-];
-
 const List<GameDefinition> casinoGames = [
   GameDefinition(
     title: 'Roulette',
-    subtitle: 'Punta su colori, numeri, pari/dispari o gruppi',
+    subtitle: 'Punta sul colore vincente',
     icon: Icons.radar_rounded,
     visual: GameVisual.roulette,
     apiPath: '/games/roulette/play',
     imageUrl: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=900&q=80',
-    choices: rouletteChoices,
+    choices: [
+      GameChoice(label: 'Rosso', value: 'red'),
+      GameChoice(label: 'Nero', value: 'black'),
+      GameChoice(label: 'Verde', value: 'green'),
+    ],
     colors: [Color(0xFFE53935), Color(0xFF111827)],
   ),
   GameDefinition(
@@ -118,31 +69,9 @@ const List<GameDefinition> casinoGames = [
     imageUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80',
     colors: [Color(0xFF111827), Color(0xFFFACC15)],
   ),
-  GameDefinition(
-    title: 'Gate of Olympus',
-    subtitle: 'Cascate divine, scatter e moltiplicatori epici',
-    icon: Icons.bolt_rounded,
-    visual: GameVisual.olympusSlot,
-    apiPath: '/games/slots/olympus/play',
-    imageUrl: 'https://images.unsplash.com/photo-1603565816030-6b389eeb23cb?auto=format&fit=crop&w=900&q=80',
-    colors: [Color(0xFF6D28D9), Color(0xFFFACC15)],
-  ),
-  GameDefinition(
-    title: 'Blackjack',
-    subtitle: 'Sfida il banco e avvicinati a 21',
-    icon: Icons.style_rounded,
-    visual: GameVisual.blackjack,
-    apiPath: '/games/blackjack/play',
-    imageUrl: 'https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=900&q=80',
-    choices: [
-      GameChoice(label: 'Stai', value: 'stand'),
-      GameChoice(label: 'Carta', value: 'hit'),
-    ],
-    colors: [Color(0xFF065F46), Color(0xFF111827)],
-  ),
 ];
 
-enum GameVisual { roulette, iceFishing, fruitSlot, crystalSlot, thunderSlot, olympusSlot, blackjack }
+enum GameVisual { roulette, iceFishing, fruitSlot, crystalSlot, thunderSlot }
 
 class GameChoice {
   const GameChoice({required this.label, required this.value});
@@ -1493,13 +1422,7 @@ class GameControls extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              game.visual == GameVisual.iceFishing
-                  ? 'Punta sul settore della ruota'
-                  : game.visual == GameVisual.roulette
-                      ? 'Scegli colore, numero o gruppo'
-                      : game.visual == GameVisual.blackjack
-                          ? 'Scegli la tua azione'
-                          : 'Scegli una giocata',
+              game.visual == GameVisual.iceFishing ? 'Punta sul settore della ruota' : 'Scegli una giocata',
               style: TextStyle(color: accent.withValues(alpha: 0.82), fontWeight: FontWeight.w700),
             ),
           ),
@@ -1572,20 +1495,11 @@ class OutcomeCard extends StatelessWidget {
   }
 
   String _details(Map<String, dynamic> result) {
-    if (result.containsKey('grid')) {
-      final events = (result['events'] as List?)?.length ?? 0;
-      return "Griglia Olympus: ${(result['grid'] as List).map((row) => (row as List).join(' ')).join(' / ')} - Eventi: $events";
-    }
-    if (result.containsKey('playerHand')) {
-      return "Giocatore: ${(result['playerHand'] as List).join(' ')} (${result['playerScore']}) - Banco: ${(result['dealerHand'] as List).join(' ')} (${result['dealerScore']})";
-    }
     if (result.containsKey('reels')) {
-      final events = (result['events'] as List?)?.length ?? 0;
-      return "Rulli: ${(result['reels'] as List).join('  ')}${events > 0 ? ' - Eventi: $events' : ''}";
+      return "Rulli: ${(result['reels'] as List).join('  ')}";
     }
     if (result.containsKey('number')) {
-      return "Numero: ${result['number']} - Colore: ${result['color']} - "
-          "Giocata: ${result['choiceLabel'] ?? result['choice']}";
+      return "Numero: ${result['number']} - Colore: ${result['color']}";
     }
     if (result.containsKey('segmentLabel')) {
       final bonus = result['bonus'] as Map<String, dynamic>?;
@@ -1644,9 +1558,8 @@ class IceWheel extends StatelessWidget {
       child: AnimatedBuilder(
         animation: animation,
         builder: (context, child) {
-          final easedStop = Curves.easeOutCubic.transform(animation.value);
-          final pulse = 1 + (math.sin(animation.value * math.pi * 4).abs() * (isPlaying ? 0.13 : 0.05));
-          final turns = isPlaying ? animation.value * math.pi * 24 : _iceWheelRotationForSegment(segment) + ((1 - easedStop) * math.pi * 8);
+          final pulse = 1 + (math.sin(animation.value * math.pi * 2).abs() * (isPlaying ? 0.08 : 0.03));
+          final turns = isPlaying ? animation.value * math.pi * 14 : _iceWheelRotationForSegment(segment) + animation.value * math.pi * 2;
           return Stack(
             alignment: Alignment.center,
             children: [
@@ -1692,8 +1605,7 @@ class IceWheel extends StatelessWidget {
     const keys = ['1x', '2x', '5x', '10x', 'coin_flip', 'pachinko', 'ice_bonus'];
     final index = keys.indexOf(segment);
     if (index < 0) return 0;
-    final sweep = math.pi * 2 / keys.length;
-    return -((index * sweep) + (sweep / 2));
+    return -(index * (math.pi * 2 / keys.length));
   }
 }
 
@@ -1792,15 +1704,7 @@ class AnimatedGameStage extends StatelessWidget {
       case GameVisual.fruitSlot:
       case GameVisual.crystalSlot:
       case GameVisual.thunderSlot:
-      case GameVisual.olympusSlot:
         return AnimatedSlotStage(
-          game: game,
-          outcome: outcome,
-          isPlaying: isPlaying,
-          animation: animation,
-        );
-      case GameVisual.blackjack:
-        return AnimatedBlackjackStage(
           game: game,
           outcome: outcome,
           isPlaying: isPlaying,
@@ -2172,6 +2076,7 @@ class IceSpecialEffect extends StatelessWidget {
   }
 }
 
+<<<<<<< HEAD
 class AnimatedBlackjackStage extends StatelessWidget {
   const AnimatedBlackjackStage({required this.game, required this.outcome, required this.isPlaying, required this.animation, super.key});
 
@@ -2264,6 +2169,8 @@ class _BlackjackHand extends StatelessWidget {
   }
 }
 
+=======
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
 class AnimatedSlotStage extends StatelessWidget {
   const AnimatedSlotStage({
     required this.game,
@@ -2285,11 +2192,15 @@ class AnimatedSlotStage extends StatelessWidget {
       case GameVisual.crystalSlot:
         return ['DI', 'RY', 'CR'];
       case GameVisual.thunderSlot:
+<<<<<<< HEAD
         return ['BOLT', 'STAR', 'W'];
       case GameVisual.olympusSlot:
         return ['BOLT', 'CROWN', 'GEM', 'VASE', 'EAGLE'];
       case GameVisual.blackjack:
         return ['A', 'K', 'Q'];
+=======
+        return ['⚡', '★', 'W'];
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
       case GameVisual.roulette:
       case GameVisual.iceFishing:
         return ['?', '?', '?'];
@@ -2304,10 +2215,6 @@ class AnimatedSlotStage extends StatelessWidget {
         return const Color(0xFF312E81);
       case GameVisual.thunderSlot:
         return const Color(0xFF111827);
-      case GameVisual.olympusSlot:
-        return const Color(0xFF3B0764);
-      case GameVisual.blackjack:
-        return const Color(0xFF064E3B);
       case GameVisual.roulette:
       case GameVisual.iceFishing:
         return primary;
@@ -2317,24 +2224,26 @@ class AnimatedSlotStage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reels = (outcome?.result['reels'] as List?)?.map((value) => value.toString()).toList() ?? fallbackSymbols;
-    final grid = (outcome?.result['grid'] as List?)?.map((row) => (row as List).map((value) => value.toString()).toList()).toList();
-    final events = (outcome?.result['events'] as List?) ?? const [];
-    final tier = outcome?.result['winTier'] as String? ?? 'none';
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
+<<<<<<< HEAD
         final progress = animation.value;
         final win = (outcome?.profit ?? 0) > 0;
         final glow = win ? gold : game.colors.first;
         final shake = win ? math.sin(progress * math.pi * 18) * 5 : 0.0;
+=======
+        final win = outcome != null && outcome!.profit > 0;
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
         return Stack(
           children: [
             Positioned.fill(child: GameArtwork(game: game)),
             Positioned.fill(
               child: CustomPaint(
-                painter: CasinoParticlePainter(progress: progress, color: glow, intense: win || isPlaying),
+                painter: CasinoParticlePainter(progress: animation.value, color: win ? gold : game.colors.first, intense: win),
               ),
             ),
+<<<<<<< HEAD
             if (win)
               Positioned.fill(
                 child: CustomPaint(
@@ -2363,21 +2272,57 @@ class AnimatedSlotStage extends StatelessWidget {
                     animation: animation,
                     panelColor: panelColor,
                   ),
+=======
+            Positioned(
+              right: 34,
+              top: 58,
+              child: Container(
+                width: 340,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: panelColor.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: gold.withValues(alpha: 0.76), width: 4),
+                  boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.26), blurRadius: 34)],
                 ),
-                child: game.visual == GameVisual.olympusSlot
-                    ? _OlympusGrid(grid: grid, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor)
-                    : _ClassicSlotReels(reels: reels, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor),
+                child: Row(
+                  children: List.generate(3, (index) {
+                    final spinOffset = isPlaying ? math.sin((animation.value * math.pi * 8) + index) * 18 : 0.0;
+                    final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 10).floor()) % fallbackSymbols.length] : reels[index];
+                    return Expanded(
+                      child: Transform.translate(
+                        offset: Offset(0, spinOffset),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 260),
+                          height: 150,
+                          margin: const EdgeInsets.symmetric(horizontal: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.94),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Center(
+                            child: Text(
+                              symbol,
+                              style: TextStyle(color: panelColor, fontSize: 46, fontWeight: FontWeight.w900),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
+                ),
               ),
             ),
             Positioned(
               right: 10,
               top: 120,
               child: Transform.rotate(
-                angle: math.sin(progress * math.pi * (isPlaying ? 8 : 2)) * (isPlaying ? 0.55 : 0.22),
+                angle: isPlaying ? math.sin(animation.value * math.pi * 2) * 0.32 : 0,
                 child: Container(
                   width: 18,
                   height: 88,
-                  decoration: BoxDecoration(color: glow, borderRadius: BorderRadius.circular(99), boxShadow: [BoxShadow(color: glow.withValues(alpha: 0.5), blurRadius: 20)]),
+                  decoration: BoxDecoration(color: gold, borderRadius: BorderRadius.circular(99)),
                 ),
               ),
             ),
@@ -2386,22 +2331,23 @@ class AnimatedSlotStage extends StatelessWidget {
                 left: 34,
                 top: 52,
                 child: ResultSpotlight(
+<<<<<<< HEAD
                   title: win ? _winTitle(tier) : 'Rulli fermati',
                   value: _slotResultValue(reels, events),
                   color: win ? glow : game.colors.first,
+=======
+                  title: win ? 'Combinazione vincente' : 'Rulli fermati',
+                  value: reels.join('  '),
+                  color: win ? gold : game.colors.first,
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
                 ),
-              ),
-            if (outcome != null && !isPlaying && win)
-              Positioned(
-                left: 54,
-                bottom: 130,
-                child: WinEventBadges(events: events, tier: tier, progress: progress),
               ),
           ],
         );
       },
     );
   }
+<<<<<<< HEAD
 
   Widget _slotContent({required List<List<String>>? grid, required List<String> reels, required List<String> fallbackSymbols, required bool isPlaying, required Animation<double> animation, required Color panelColor}) {
     if (game.visual == GameVisual.olympusSlot) {
@@ -2572,6 +2518,8 @@ class WinBurstPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant WinBurstPainter oldDelegate) => oldDelegate.progress != progress || oldDelegate.color != color;
+=======
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
 }
 
 class CasinoParticlePainter extends CustomPainter {
@@ -2691,6 +2639,7 @@ class GameArtwork extends StatelessWidget {
           panelColor: Color(0xFF111827),
           glowColor: Color(0xFFFACC15),
         );
+<<<<<<< HEAD
       case GameVisual.olympusSlot:
         return const SlotArtwork(
           symbols: ['BOLT', 'CROWN', 'GEM'],
@@ -2699,44 +2648,9 @@ class GameArtwork extends StatelessWidget {
         );
       case GameVisual.blackjack:
         return const BlackjackArtwork();
+=======
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
     }
-  }
-}
-
-class BlackjackArtwork extends StatelessWidget {
-  const BlackjackArtwork({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(colors: [const Color(0xFF047857).withValues(alpha: 0.72), const Color(0xFF022C22).withValues(alpha: 0.92)]),
-            ),
-          ),
-        ),
-        Positioned(
-          right: 34,
-          top: 34,
-          child: Icon(Icons.style_rounded, color: gold.withValues(alpha: 0.5), size: 150),
-        ),
-        Positioned(
-          left: 42,
-          bottom: 70,
-          child: Container(
-            width: 320,
-            height: 150,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: gold.withValues(alpha: 0.42), width: 5),
-              color: Colors.black.withValues(alpha: 0.18),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
 

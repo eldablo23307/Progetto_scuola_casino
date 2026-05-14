@@ -57,6 +57,7 @@ class Casino:
             "jackpot_multiplier": 30,
             "pair": 2.5,
         },
+<<<<<<< HEAD
         "olympus": {
             "game": "Gate of Olympus",
             "symbols": ["BOLT", "CROWN", "GEM", "VASE", "EAGLE", "SHIELD", "ORB"],
@@ -66,11 +67,15 @@ class Casino:
             "rows": 3,
             "columns": 5,
         },
+=======
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
     }
 
     def roulette(self, bet: float, choice: str) -> dict:
         choice = choice.lower().strip()
-        bet_data = self._roulette_bet(choice)
+        allowed = {"red", "black", "green"}
+        if choice not in allowed:
+            raise ValueError("Scelta roulette non valida")
 
         number = random.randint(0, 36)
         if number == 0:
@@ -80,24 +85,17 @@ class Casino:
         else:
             color = "black"
 
-        won = bet_data["matcher"](number, color)
-        multiplier = bet_data["multiplier"] if won else 0
-        payout = bet * multiplier
+        multiplier = 14 if color == "green" else 2
+        payout = bet * multiplier if choice == color else 0
         return self._result(
             "Roulette",
             bet,
             payout,
-            {
-                "number": number,
-                "color": color,
-                "choice": choice,
-                "choiceLabel": bet_data["label"],
-                "betType": bet_data["type"],
-                "multiplier": multiplier,
-            },
-            f"La pallina si ferma su {number} {color}. Giocata: {bet_data['label']}.",
+            {"number": number, "color": color, "choice": choice, "multiplier": multiplier if choice == color else 0},
+            f"La pallina si ferma su {number} {color}.",
         )
 
+<<<<<<< HEAD
     def _roulette_bet(self, choice: str) -> dict:
         color_bets = {
             "red": {"label": "Rosso", "type": "colore", "multiplier": 2, "matcher": lambda number, color: color == "red"},
@@ -143,11 +141,11 @@ class Casino:
 
         raise ValueError("Scelta roulette non valida")
 
+=======
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
     def slot(self, theme: str, bet: float) -> dict:
         if theme not in self.SLOT_CONFIGS:
             raise ValueError("Slot non valida")
-        if theme == "olympus":
-            return self._olympus_slot(bet)
 
         config = self.SLOT_CONFIGS[theme]
         reels = [random.choice(config["symbols"]) for _ in range(3)]
@@ -155,26 +153,24 @@ class Casino:
 
         multiplier = 0
         message = "Nessuna combinazione vincente."
-        win_tier = "none"
         if len(counts) == 1:
             symbol = reels[0]
             multiplier = config["jackpot_multiplier"] if symbol == config["jackpot"] else config["triple"]
-            message = "Jackpot esplosivo!" if symbol == config["jackpot"] else "Tre simboli uguali!"
-            win_tier = "jackpot" if symbol == config["jackpot"] else "triple"
+            message = "Jackpot!" if symbol == config["jackpot"] else "Tre simboli uguali!"
         elif max(counts.values()) == 2:
             multiplier = config["pair"]
             message = "Coppia vincente!"
-            win_tier = "pair"
 
         payout = bet * multiplier
         return self._result(
             config["game"],
             bet,
             payout,
-            {"reels": reels, "multiplier": multiplier, "winTier": win_tier, "events": []},
+            {"reels": reels, "multiplier": multiplier},
             message,
         )
 
+<<<<<<< HEAD
     def _olympus_slot(self, bet: float) -> dict:
         config = self.SLOT_CONFIGS["olympus"]
         rows = config["rows"]
@@ -326,6 +322,8 @@ class Casino:
             aces -= 1
         return score
 
+=======
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
     def ice_fishing(self, bet: float, choice: str) -> dict:
         """Crazy Time inspired wheel with number slices and bonus rounds."""
         choice = choice.lower().strip()

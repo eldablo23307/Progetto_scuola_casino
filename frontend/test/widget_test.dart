@@ -14,22 +14,11 @@ void main() {
   test('include i giochi principali della dashboard', () {
     expect(
       casinoGames.map((game) => game.title),
-      containsAll(['Roulette', 'Ice Fishing', 'Gate of Olympus', 'Blackjack']),
+      containsAll(['Roulette', 'Ice Fishing']),
     );
     expect(
-      casinoGames.where((game) => game.apiPath.startsWith('/games/slots/')),
-      hasLength(4),
-    );
-  });
-
-  test('include le nuove puntate della roulette', () {
-    expect(
-      rouletteChoices.map((choice) => choice.value),
-      containsAll(['number_0', 'number_17', 'even', 'odd', 'dozen_1', 'column_3']),
-    );
-    expect(
-      rouletteChoices.where((choice) => choice.value.startsWith('number_')),
-      hasLength(37),
+      casinoGames.where((game) => game.title.startsWith('Slot')),
+      hasLength(3),
     );
   });
 }

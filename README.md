@@ -3,25 +3,21 @@
 Creato da: Daniele Mottura, Rikardo Babaj, Fabrizio Forcinito
 
 ## Analisi Requisiti
-Il progetto richiede la creazione di un servizio, web o di una applicazione la quale usi un database. Per il progetto il nostro gruppo ha deciso di creare un sito web per le scommesse.
-Esso dovrà fornire agli utenti una piattaforma web per scommettere e per il gioco d'azzardo, con la possibilità di creare un account simulato per provare la piattaforma utilizzando soldi virtuali non scambiabili. Inoltre sarà possibile ricaricare soldi tramite l'utilizzo di crypto valute.
-Il sito web comunica con il server tramite API fornite dal backend.
-
+Il progetto richiede la creazione di un servizio, web o di una applicazione la quale usi un database, per il progetto il nostro gruppo a deciso di creare un sito web per le scommesse.
+Esso dovrà fornire agli utenti una piattaforma web per scommettere e per il gioco d'azzardo, sarà possibile la creazione di un account simulato per provare la piattaforma utilizzando soldi virtuali non scambiabili. Inoltre sarà possibile ricaricare soldi tramite l'utilizzo di crypto valute.
+Il sito web comunicherà con il server tramite API, fornita da quest'ultimo.
 ## Descrizione
 
 **Brawls Bets** è un progetto scolastico che simula una piattaforma di scommesse e gioco d'azzardo con denaro virtuale. L'applicazione è composta da:
 
-- un **frontend Flutter/Dart** multipiattaforma con interfaccia Material Design;
-- un **backend Flask/Python** che espone API HTTP per autenticazione, dati utente e giocate;
-- un **motore casinò Python** che calcola gli esiti dei giochi;
+- un **frontend Flutter/Dart** multipiattaforma;
+- un **backend Flask/Python** che espone API HTTP;
 - un **database MySQL** chiamato `Casino`.
 
-Gli utenti possono registrarsi, effettuare il login, visualizzare il proprio bilancio e accedere alla dashboard dei giochi. In fase di registrazione è possibile scegliere tra:
+Gli utenti possono registrarsi, effettuare il login e accedere alla schermata principale dell'app. In fase di registrazione è possibile scegliere tra:
 
 - **account simulato**, con saldo iniziale virtuale di `5000` e indirizzo wallet generato automaticamente se non viene fornito;
 - **account non simulato**, con saldo iniziale `0` e indirizzo wallet inserito dall'utente.
-
-Dopo l'accesso l'utente può giocare a Roulette, Ice Fishing e quattro slot machine tematiche e Blackjack. Ogni giocata invia al backend l'ID giocatore, la puntata e, quando necessario, la scelta dell'utente. Il backend controlla il saldo, calcola il risultato, aggiorna il bilancio nel database e restituisce il nuovo stato al frontend.
 
 > Il progetto è una simulazione didattica: i fondi non sono reali e non sono scambiabili.
 
@@ -33,18 +29,15 @@ Dopo l'accesso l'utente può giocare a Roulette, Ice Fishing e quattro slot mach
 - Dart
 - Material Design
 - Pacchetto `http` per comunicare con il backend
-- Animazioni Flutter per dashboard, carte gioco e schermate di giocata
 
 ### Backend
 
 - Python
 - Flask
-- Flask-CORS
-- mysql-connector-python
-- Dataclass Python per rappresentare i risultati dei giochi
+- Flutter
+- Dart
 
 ### Schema Database
-
 - Utente(<u>ID_Giocatore</u>, Nome, Cognome, Email, Password, Profile_Picture, FK_Fidalty, Fk_Balance, FK_Prefered_Game)
 - Bonus(<u>ID_Bonus</u>, Punti, Tipo_Bonus)
 - Account_Balance(<u>ID_Balance</u>, Crypto_Address, Current_Balance, Account_Type, FK_Movimento)
@@ -52,10 +45,10 @@ Dopo l'accesso l'utente può giocare a Roulette, Ice Fishing e quattro slot mach
 - Giochi(<u>ID_Giochi</u>, Nome, Categoria)
 
 ## Frontend
-Il frontend è realizzato tramite Flutter per permettere all'utente di accedere alla piattaforma da più dispositivi e piattaforme. L'interfaccia include login, registrazione, dashboard utente, bilancio aggiornato, griglia dei giochi disponibili e pagine dedicate alla giocata con animazioni e risultati.
-
+Il frontend è realizzato tramite flutter per permettere all'utente da utilizzare qualsiasi piattaforma che vuole per accedere al sito
 ## Backend
-Il backend è realizzato con Flask, espone API JSON e usa CORS per permettere le richieste dal frontend. Le operazioni principali sono login, registrazione, recupero dati utente, lista giochi e gestione delle giocate con aggiornamento atomico del bilancio.
+- Flask-CORS
+- mysql-connector-python
 
 ### Database
 
@@ -67,13 +60,12 @@ Il backend è realizzato con Flask, espone API JSON e usa CORS per permettere le
 .
 ├── Backend/
 │   ├── main.py              # Server Flask e definizione delle API
-│   ├── Database_Handler.py  # Connessione MySQL, utenti, bilancio e giocate
-│   └── Casino_Handler.py    # Motore dei giochi: roulette, ice fishing e slot
+│   ├── Database_Handler.py  # Connessione MySQL e operazioni su utenti/giochi
+│   └── Casino_Handler.py    # File predisposto per logiche future del casinò
 ├── frontend/
-│   ├── lib/main.dart        # Interfaccia Flutter, sessione utente, dashboard e giochi
-│   ├── test/widget_test.dart # Test Flutter della schermata login e dei giochi
+│   ├── lib/main.dart        # Interfaccia Flutter, login, registrazione e main page
 │   └── pubspec.yaml         # Configurazione e dipendenze Flutter
-├── Database_script.sql      # Script SQL per creare database, tabelle e giochi iniziali
+├── Database_script.sql      # Script SQL per creare database e tabelle
 ├── DiagrammaER.er           # Diagramma ER del database
 └── README.md
 ```
@@ -95,16 +87,6 @@ Relazioni principali:
 - un `Utente` può avere un gioco preferito tramite `FK_Prefered_Game`;
 - `Account_Balance` può essere collegato a un movimento tramite `FK_Movimenti`.
 
-Lo script inserisce anche i giochi iniziali disponibili nella dashboard:
-
-- `Roulette`, categoria `Tavolo`;
-- `Ice Fishing`, categoria `Arcade`;
-- `Slot Frutta`, categoria `Slot`;
-- `Slot Cristalli`, categoria `Slot`;
-- `Slot Fulmini`, categoria `Slot`;
-- `Gate of Olympus`, categoria `Slot`;
-- `Blackjack`, categoria `Tavolo`.
-
 ## Backend
 
 Il backend si trova nella cartella `Backend/` ed espone un server Flask in ascolto su `0.0.0.0`. La connessione al database è configurata in `Database_Handler.py` con questi parametri:
@@ -120,7 +102,7 @@ database="Casino"
 
 #### `POST /login`
 
-Effettua il login di un utente e restituisce i dati di sessione necessari al frontend.
+Effettua il login di un utente.
 
 Body JSON richiesto:
 
@@ -133,23 +115,13 @@ Body JSON richiesto:
 
 Risposte:
 
-- `200` con JSON contenente `id_giocatore`, `nome` e `bilancio` se le credenziali sono accettate;
+- `200` con testo `Logged Succesfully` se le credenziali sono accettate;
 - `500` se il login fallisce;
 - `501` per metodi non supportati.
 
-Esempio risposta `200`:
-
-```json
-{
-  "id_giocatore": 1,
-  "nome": "Mario",
-  "bilancio": 5000
-}
-```
-
 #### `POST /register`
 
-Registra un nuovo utente, crea il relativo record in `Account_Balance` e restituisce i dati di sessione.
+Registra un nuovo utente e crea il relativo record in `Account_Balance`.
 
 Body JSON richiesto:
 
@@ -171,26 +143,13 @@ Note sul campo `account_type`:
 
 Risposte:
 
-- `200` con JSON contenente `id_giocatore`, `nome` e `bilancio` se la registrazione va a buon fine;
+- `200` con testo `Register Succesfully` se la registrazione va a buon fine;
 - `500` se la registrazione fallisce;
 - `501` per metodi non supportati.
 
-#### `GET /MainApp?id_giocatore=<id>`
-
-Recupera i dati aggiornati dell'utente dopo login, registrazione o ritorno alla dashboard.
-
-Parametri query:
-
-- `id_giocatore`: ID numerico del giocatore.
-
-Risposte:
-
-- `200` con JSON contenente `id_giocatore`, `nome` e `bilancio`;
-- `400` se manca `id_giocatore`;
-- `404` se il giocatore non esiste.
-
 #### `GET /get_slot`
 
+<<<<<<< HEAD
 Restituisce l'elenco dei giochi presenti nella tabella `Giochi` nel formato JSON con campi `Nome` e `Categoria`.
 
 #### `POST /games/roulette/play`
@@ -314,6 +273,9 @@ Errori comuni:
 
 - `400` se mancano `id_giocatore` o `bet`, se la puntata non è valida, se il saldo è insufficiente o se la scelta del gioco non è valida;
 - `404` se il giocatore non esiste.
+=======
+Restituisce l'elenco dei giochi presenti nella tabella `Giochi` nel formato `(Nome, Categoria)`.
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
 
 ## Frontend
 
@@ -327,8 +289,6 @@ Le rotte principali definite in `frontend/lib/main.dart` sono:
 - `/Register`: schermata di registrazione;
 - `/MainApp`: schermata principale dopo login o registrazione riusciti.
 
-Oltre alle rotte principali, l'apertura di un gioco avviene tramite una pagina Flutter dedicata (`GamePlayPage`) raggiunta dalla dashboard con `Navigator.push`.
-
 ### Funzionalità implementate
 
 - Login con campi `Email` e `Password`.
@@ -336,6 +296,7 @@ Oltre alle rotte principali, l'apertura di un gioco avviene tramite una pagina F
 - Checkbox `Simulated Account` per scegliere il tipo di account.
 - Campo `Wallet Address` visibile solo quando l'account non è simulato.
 - Invio dei dati al backend in formato JSON.
+<<<<<<< HEAD
 - Salvataggio dei dati di sessione nel frontend tramite `UserSession`.
 - Recupero dei dati aggiornati dell'utente tramite endpoint `/MainApp`.
 - Dashboard con nome utente, ID giocatore e bilancio in crediti.
@@ -359,6 +320,9 @@ Oltre alle rotte principali, l'apertura di un gioco avviene tramite una pagina F
 - **Slot Fulmini**: slot ad alta volatilità con moltiplicatori maggiori.
 - **Gate of Olympus**: slot ispirata alle slot a griglia con eventi multipli, cascate, scatter, wild, difficoltà di vincita aumentata e vincite animate per livello.
 - **Blackjack**: mano rapida contro il banco con scelta tra stare o chiedere carta.
+=======
+- Navigazione automatica alla schermata principale quando il backend risponde con codice `200`.
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
 
 ### Endpoint usati dal frontend
 
@@ -366,14 +330,6 @@ Il frontend invia le richieste a:
 
 - `http://127.0.0.1:5000/login`
 - `http://127.0.0.1:5000/register`
-- `http://127.0.0.1:5000/MainApp?id_giocatore=<id>`
-- `http://127.0.0.1:5000/games/roulette/play`
-- `http://127.0.0.1:5000/games/ice-fishing/play`
-- `http://127.0.0.1:5000/games/slots/fruit/play`
-- `http://127.0.0.1:5000/games/slots/crystal/play`
-- `http://127.0.0.1:5000/games/slots/thunder/play`
-- `http://127.0.0.1:5000/games/slots/olympus/play`
-- `http://127.0.0.1:5000/games/blackjack/play`
 
 Se si esegue l'app da un dispositivo fisico, da un emulatore o da un container, potrebbe essere necessario sostituire `127.0.0.1` con l'indirizzo IP della macchina che esegue il backend.
 
@@ -387,7 +343,7 @@ Accedere a MySQL ed eseguire lo script:
 mysql -u root < Database_script.sql
 ```
 
-Lo script crea il database `Casino`, tutte le tabelle richieste e popola la tabella `Giochi` con i giochi iniziali.
+Lo script crea il database `Casino` e tutte le tabelle richieste.
 
 ### 2. Avviare il backend
 
@@ -427,41 +383,28 @@ Per l'esecuzione web:
 flutter run -d chrome
 ```
 
-### 4. Eseguire i test Flutter
-
-Dalla cartella `frontend/` è possibile eseguire:
-
-```bash
-flutter test
-```
-
-I test verificano la presenza della schermata di login e dei giochi principali nella dashboard.
-
 ## Stato attuale del progetto
 
 Funzionalità già presenti nel codice:
 
 - database relazionale MySQL con utenti, giochi, bonus, movimenti e bilanci account;
-- popolamento iniziale della tabella `Giochi`;
-- API Flask per login, registrazione, recupero dati utente e recupero dei giochi;
-- API Flask per eseguire giocate su Roulette, Ice Fishing, slot e Blackjack;
+- API Flask per login, registrazione e recupero dei giochi;
 - supporto CORS nel backend;
-- motore casinò separato dal database in `Casino_Handler.py`;
-- validazione backend di puntata, saldo, giocatore e scelta del gioco;
-- aggiornamento del bilancio dopo ogni giocata;
 - interfaccia Flutter con login, registrazione e schermata principale;
+<<<<<<< HEAD
 - dashboard Flutter con bilancio aggiornato, ID giocatore e griglia dei giochi;
 - pagine Flutter dedicate alle giocate con animazioni più vivaci, ruota Ice Fishing allineata al risultato, slot centrate con giro più lento, Gate of Olympus più difficile e riepilogo risultato;
 - creazione automatica del bilancio account durante la registrazione;
 - test Flutter per login e lista giochi.
+=======
+- creazione automatica del bilancio account durante la registrazione.
+>>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
 
 Funzionalità predisposte o migliorabili:
 
-- gestione e visualizzazione dello storico dei movimenti;
+- popolamento iniziale della tabella `Giochi`;
+- visualizzazione dei giochi nella schermata principale;
 - gestione più dettagliata degli errori nel frontend;
-- protezione delle password tramite hashing;
-- validazione più completa degli input lato frontend e backend;
+- protezione delle password e validazione degli input;
 - configurazione esterna per credenziali database e URL del backend;
-- ricarica del saldo tramite crypto valute simulate;
-- uso effettivo di bonus/fidelity e gioco preferito;
-- ampliamento dei test backend e frontend.
+- implementazione della logica di gioco in `Casino_Handler.py`.
