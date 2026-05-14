@@ -48,4 +48,6 @@ INSERT INTO Giochi (Nome, Categoria) VALUES
 ('Ice Fishing', 'Arcade'),
 ('Slot Frutta', 'Slot'),
 ('Slot Cristalli', 'Slot'),
-('Slot Fulmini', 'Slot');
+('Slot Fulmini', 'Slot'),
+('Gate of Olympus', 'Slot'),
+('Blackjack', 'Tavolo');
