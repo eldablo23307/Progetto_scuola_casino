@@ -1193,15 +1193,19 @@ class _GamePlayPageState extends State<GamePlayPage> with SingleTickerProviderSt
       case GameVisual.fruitSlot:
       case GameVisual.crystalSlot:
       case GameVisual.thunderSlot:
-        return const Duration(milliseconds: 3200);
+        return const Duration(milliseconds: 7600);
       case GameVisual.olympusSlot:
-        return const Duration(milliseconds: 4200);
+        return const Duration(milliseconds: 9200);
       case GameVisual.iceFishing:
         return const Duration(milliseconds: 2600);
       case GameVisual.roulette:
       case GameVisual.blackjack:
         return const Duration(milliseconds: 1800);
     }
+  }
+
+  bool _isSlotVisual(GameVisual visual) {
+    return visual == GameVisual.fruitSlot || visual == GameVisual.crystalSlot || visual == GameVisual.thunderSlot || visual == GameVisual.olympusSlot;
   }
 
   @override
@@ -1233,11 +1237,18 @@ class _GamePlayPageState extends State<GamePlayPage> with SingleTickerProviderSt
       if (widget.game.needsChoice) {
         body['choice'] = selectedChoice ?? '';
       }
-      final response = await http.post(
+      final responseFuture = http.post(
         Uri.parse('$apiBaseUrl${widget.game.apiPath}'),
         headers: const {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode(body),
       );
+      final response = _isSlotVisual(widget.game.visual)
+          ? (await Future.wait<dynamic>([
+              responseFuture,
+              Future<void>.delayed(_animationDuration(widget.game.visual)),
+            ]))
+              .first as http.Response
+          : await responseFuture;
 
       if (response.statusCode != 200) {
         throw Exception('Giocata non riuscita');
@@ -2144,6 +2155,7 @@ class IceSpecialEffect extends StatelessWidget {
         icon = Icons.phishing_rounded;
         title = 'ICE BONUS';
     }
+    final bonusData = bonus;
     return Transform.scale(
       scale: 1 + math.sin(progress * math.pi * 2).abs() * 0.08,
       child: Container(
@@ -2161,9 +2173,9 @@ class IceSpecialEffect extends StatelessWidget {
             Icon(icon, color: primary, size: 58),
             const SizedBox(height: 8),
             Text(title, style: const TextStyle(color: primary, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
-            if (bonus != null) ...[
+            if (bonusData != null) ...[
               const SizedBox(height: 6),
-              Text('${bonus['multiplier']}x', style: const TextStyle(color: primary, fontSize: 38, fontWeight: FontWeight.w900)),
+              Text('${bonusData['multiplier']}x', style: const TextStyle(color: primary, fontSize: 38, fontWeight: FontWeight.w900)),
             ],
           ],
         ),
@@ -2287,7 +2299,7 @@ class AnimatedSlotStage extends StatelessWidget {
       case GameVisual.thunderSlot:
         return ['BOLT', 'STAR', 'W'];
       case GameVisual.olympusSlot:
-        return ['BOLT', 'CROWN', 'GEM', 'VASE', 'EAGLE'];
+        return ['BOLT', 'CROWN', 'GEM', 'VASE', 'EAGLE', 'SHIELD', 'ORB'];
       case GameVisual.blackjack:
         return ['A', 'K', 'Q'];
       case GameVisual.roulette:
@@ -2364,9 +2376,6 @@ class AnimatedSlotStage extends StatelessWidget {
                     panelColor: panelColor,
                   ),
                 ),
-                child: game.visual == GameVisual.olympusSlot
-                    ? _OlympusGrid(grid: grid, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor)
-                    : _ClassicSlotReels(reels: reels, fallbackSymbols: fallbackSymbols, isPlaying: isPlaying, animation: animation, panelColor: panelColor),
               ),
             ),
             Positioned(
@@ -2432,6 +2441,79 @@ class AnimatedSlotStage extends StatelessWidget {
   }
 }
 
+class _ScrollingSymbolFace extends StatelessWidget {
+  const _ScrollingSymbolFace({
+    required this.symbol,
+    required this.fallbackSymbols,
+    required this.isPlaying,
+    required this.animation,
+    required this.panelColor,
+    required this.symbolIndex,
+    required this.height,
+    required this.largeFontSize,
+    required this.longFontSize,
+    required this.scrollCycles,
+  });
+
+  final String symbol;
+  final List<String> fallbackSymbols;
+  final bool isPlaying;
+  final Animation<double> animation;
+  final Color panelColor;
+  final int symbolIndex;
+  final double height;
+  final double largeFontSize;
+  final double longFontSize;
+  final int scrollCycles;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isPlaying) {
+      return _symbolText(symbol);
+    }
+
+    final symbols = fallbackSymbols.isEmpty ? [symbol] : fallbackSymbols;
+    final position = animation.value * symbols.length * scrollCycles + symbolIndex * 0.65;
+    final baseIndex = position.floor();
+    final fraction = position - baseIndex;
+    final itemHeight = height * 0.58;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        alignment: Alignment.center,
+        children: List.generate(7, (visibleIndex) {
+          final slotOffset = visibleIndex - 3;
+          final currentSymbol = symbols[(baseIndex + slotOffset) % symbols.length];
+          final distanceFromCenter = (slotOffset - fraction).abs();
+          return Transform.translate(
+            offset: Offset(0, (slotOffset - fraction) * itemHeight),
+            child: Opacity(
+              opacity: (1 - distanceFromCenter * 0.22).clamp(0.18, 1).toDouble(),
+              child: Transform.scale(
+                scale: (1 - distanceFromCenter * 0.08).clamp(0.72, 1).toDouble(),
+                child: _symbolText(currentSymbol),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _symbolText(String value) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(value, maxLines: 1, style: TextStyle(color: panelColor, fontSize: value.length > 2 ? longFontSize : largeFontSize, fontWeight: FontWeight.w900)),
+        ),
+      ),
+    );
+  }
+}
+
 class _ClassicSlotReels extends StatelessWidget {
   const _ClassicSlotReels({required this.reels, required this.fallbackSymbols, required this.isPlaying, required this.animation, required this.panelColor});
 
@@ -2445,8 +2527,8 @@ class _ClassicSlotReels extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: List.generate(3, (index) {
-        final spinOffset = isPlaying ? math.sin((animation.value * math.pi * 8) + index) * 28 : math.sin(animation.value * math.pi * 2 + index) * 3;
-        final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 10).floor()) % fallbackSymbols.length] : reels[index];
+        final spinOffset = isPlaying ? math.sin((animation.value * math.pi * 2) + index) * 6 : math.sin(animation.value * math.pi * 2 + index) * 3;
+        final symbol = isPlaying ? fallbackSymbols[index % fallbackSymbols.length] : reels[index];
         return Expanded(
           child: Transform.translate(
             offset: Offset(0, spinOffset),
@@ -2459,7 +2541,18 @@ class _ClassicSlotReels extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.22), blurRadius: 18)],
               ),
-              child: Center(child: Text(symbol, style: TextStyle(color: panelColor, fontSize: symbol.length > 2 ? 22 : 46, fontWeight: FontWeight.w900))),
+              child: _ScrollingSymbolFace(
+                symbol: symbol,
+                fallbackSymbols: fallbackSymbols,
+                isPlaying: isPlaying,
+                animation: animation,
+                panelColor: panelColor,
+                symbolIndex: index,
+                height: 150,
+                largeFontSize: 46,
+                longFontSize: 24,
+                scrollCycles: 9,
+              ),
             ),
           ),
         );
@@ -2486,8 +2579,8 @@ class _OlympusGrid extends StatelessWidget {
         return Row(
           children: List.generate(5, (column) {
             final index = row * 5 + column;
-            final spin = isPlaying ? math.sin(animation.value * math.pi * 9 + index) * 18 : 0.0;
-            final symbol = isPlaying ? fallbackSymbols[(index + (animation.value * 12).floor()) % fallbackSymbols.length] : visibleGrid[row][column];
+            final spin = isPlaying ? math.sin(animation.value * math.pi * 2 + index) * 4 : 0.0;
+            final symbol = isPlaying ? fallbackSymbols[index % fallbackSymbols.length] : visibleGrid[row][column];
             return Expanded(
               child: Transform.translate(
                 offset: Offset(0, spin),
@@ -2500,7 +2593,18 @@ class _OlympusGrid extends StatelessWidget {
                     border: Border.all(color: gold.withValues(alpha: 0.42)),
                     boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.16), blurRadius: 12)],
                   ),
-                  child: Center(child: Text(symbol, style: TextStyle(color: panelColor, fontSize: symbol.length > 2 ? 14 : 30, fontWeight: FontWeight.w900))),
+                  child: _ScrollingSymbolFace(
+                    symbol: symbol,
+                    fallbackSymbols: fallbackSymbols,
+                    isPlaying: isPlaying,
+                    animation: animation,
+                    panelColor: panelColor,
+                    symbolIndex: index,
+                    height: 74,
+                    largeFontSize: 30,
+                    longFontSize: 18,
+                    scrollCycles: 7,
+                  ),
                 ),
               ),
             );
