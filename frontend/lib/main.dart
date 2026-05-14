@@ -2076,7 +2076,7 @@ class IceSpecialEffect extends StatelessWidget {
   }
 }
 
-<<<<<<< HEAD
+
 class AnimatedBlackjackStage extends StatelessWidget {
   const AnimatedBlackjackStage({required this.game, required this.outcome, required this.isPlaying, required this.animation, super.key});
 
@@ -2169,8 +2169,6 @@ class _BlackjackHand extends StatelessWidget {
   }
 }
 
-=======
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
 class AnimatedSlotStage extends StatelessWidget {
   const AnimatedSlotStage({
     required this.game,
@@ -2192,15 +2190,12 @@ class AnimatedSlotStage extends StatelessWidget {
       case GameVisual.crystalSlot:
         return ['DI', 'RY', 'CR'];
       case GameVisual.thunderSlot:
-<<<<<<< HEAD
+
         return ['BOLT', 'STAR', 'W'];
       case GameVisual.olympusSlot:
         return ['BOLT', 'CROWN', 'GEM', 'VASE', 'EAGLE'];
       case GameVisual.blackjack:
         return ['A', 'K', 'Q'];
-=======
-        return ['⚡', '★', 'W'];
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
       case GameVisual.roulette:
       case GameVisual.iceFishing:
         return ['?', '?', '?'];
@@ -2227,23 +2222,7 @@ class AnimatedSlotStage extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-<<<<<<< HEAD
-        final progress = animation.value;
-        final win = (outcome?.profit ?? 0) > 0;
-        final glow = win ? gold : game.colors.first;
-        final shake = win ? math.sin(progress * math.pi * 18) * 5 : 0.0;
-=======
-        final win = outcome != null && outcome!.profit > 0;
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
-        return Stack(
-          children: [
-            Positioned.fill(child: GameArtwork(game: game)),
-            Positioned.fill(
-              child: CustomPaint(
-                painter: CasinoParticlePainter(progress: animation.value, color: win ? gold : game.colors.first, intense: win),
-              ),
-            ),
-<<<<<<< HEAD
+
             if (win)
               Positioned.fill(
                 child: CustomPaint(
@@ -2271,8 +2250,7 @@ class AnimatedSlotStage extends StatelessWidget {
                     isPlaying: isPlaying,
                     animation: animation,
                     panelColor: panelColor,
-                  ),
-=======
+
             Positioned(
               right: 34,
               top: 58,
@@ -2310,7 +2288,6 @@ class AnimatedSlotStage extends StatelessWidget {
                       ),
                     );
                   }),
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
                 ),
               ),
             ),
@@ -2331,15 +2308,17 @@ class AnimatedSlotStage extends StatelessWidget {
                 left: 34,
                 top: 52,
                 child: ResultSpotlight(
-<<<<<<< HEAD
+
                   title: win ? _winTitle(tier) : 'Rulli fermati',
                   value: _slotResultValue(reels, events),
                   color: win ? glow : game.colors.first,
-=======
+      title: win ? 'Combinazione vincente' : 'Rulli fermati',
+                  value: reels.join('  '),
+                  color: win ? gold : game.colors.first,
+
                   title: win ? 'Combinazione vincente' : 'Rulli fermati',
                   value: reels.join('  '),
                   color: win ? gold : game.colors.first,
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
                 ),
               ),
           ],
@@ -2347,7 +2326,7 @@ class AnimatedSlotStage extends StatelessWidget {
       },
     );
   }
-<<<<<<< HEAD
+
 
   Widget _slotContent({required List<List<String>>? grid, required List<String> reels, required List<String> fallbackSymbols, required bool isPlaying, required Animation<double> animation, required Color panelColor}) {
     if (game.visual == GameVisual.olympusSlot) {
@@ -2518,8 +2497,6 @@ class WinBurstPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant WinBurstPainter oldDelegate) => oldDelegate.progress != progress || oldDelegate.color != color;
-=======
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
 }
 
 class CasinoParticlePainter extends CustomPainter {
@@ -2639,7 +2616,7 @@ class GameArtwork extends StatelessWidget {
           panelColor: Color(0xFF111827),
           glowColor: Color(0xFFFACC15),
         );
-<<<<<<< HEAD
+
       case GameVisual.olympusSlot:
         return const SlotArtwork(
           symbols: ['BOLT', 'CROWN', 'GEM'],
@@ -2648,8 +2625,6 @@ class GameArtwork extends StatelessWidget {
         );
       case GameVisual.blackjack:
         return const BlackjackArtwork();
-=======
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
     }
   }
 }

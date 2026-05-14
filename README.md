@@ -149,7 +149,7 @@ Risposte:
 
 #### `GET /get_slot`
 
-<<<<<<< HEAD
+
 Restituisce l'elenco dei giochi presenti nella tabella `Giochi` nel formato JSON con campi `Nome` e `Categoria`.
 
 #### `POST /games/roulette/play`
@@ -273,9 +273,7 @@ Errori comuni:
 
 - `400` se mancano `id_giocatore` o `bet`, se la puntata non è valida, se il saldo è insufficiente o se la scelta del gioco non è valida;
 - `404` se il giocatore non esiste.
-=======
-Restituisce l'elenco dei giochi presenti nella tabella `Giochi` nel formato `(Nome, Categoria)`.
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
+
 
 ## Frontend
 
@@ -296,7 +294,7 @@ Le rotte principali definite in `frontend/lib/main.dart` sono:
 - Checkbox `Simulated Account` per scegliere il tipo di account.
 - Campo `Wallet Address` visibile solo quando l'account non è simulato.
 - Invio dei dati al backend in formato JSON.
-<<<<<<< HEAD
+
 - Salvataggio dei dati di sessione nel frontend tramite `UserSession`.
 - Recupero dei dati aggiornati dell'utente tramite endpoint `/MainApp`.
 - Dashboard con nome utente, ID giocatore e bilancio in crediti.
@@ -320,9 +318,7 @@ Le rotte principali definite in `frontend/lib/main.dart` sono:
 - **Slot Fulmini**: slot ad alta volatilità con moltiplicatori maggiori.
 - **Gate of Olympus**: slot ispirata alle slot a griglia con eventi multipli, cascate, scatter, wild, difficoltà di vincita aumentata e vincite animate per livello.
 - **Blackjack**: mano rapida contro il banco con scelta tra stare o chiedere carta.
-=======
-- Navigazione automatica alla schermata principale quando il backend risponde con codice `200`.
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
+
 
 ### Endpoint usati dal frontend
 
@@ -391,14 +387,11 @@ Funzionalità già presenti nel codice:
 - API Flask per login, registrazione e recupero dei giochi;
 - supporto CORS nel backend;
 - interfaccia Flutter con login, registrazione e schermata principale;
-<<<<<<< HEAD
+
 - dashboard Flutter con bilancio aggiornato, ID giocatore e griglia dei giochi;
 - pagine Flutter dedicate alle giocate con animazioni più vivaci, ruota Ice Fishing allineata al risultato, slot centrate con giro più lento, Gate of Olympus più difficile e riepilogo risultato;
 - creazione automatica del bilancio account durante la registrazione;
 - test Flutter per login e lista giochi.
-=======
-- creazione automatica del bilancio account durante la registrazione.
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
 
 Funzionalità predisposte o migliorabili:
 

@@ -57,7 +57,7 @@ class Casino:
             "jackpot_multiplier": 30,
             "pair": 2.5,
         },
-<<<<<<< HEAD
+
         "olympus": {
             "game": "Gate of Olympus",
             "symbols": ["BOLT", "CROWN", "GEM", "VASE", "EAGLE", "SHIELD", "ORB"],
@@ -67,8 +67,6 @@ class Casino:
             "rows": 3,
             "columns": 5,
         },
-=======
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
     }
 
     def roulette(self, bet: float, choice: str) -> dict:
@@ -95,7 +93,6 @@ class Casino:
             f"La pallina si ferma su {number} {color}.",
         )
 
-<<<<<<< HEAD
     def _roulette_bet(self, choice: str) -> dict:
         color_bets = {
             "red": {"label": "Rosso", "type": "colore", "multiplier": 2, "matcher": lambda number, color: color == "red"},
@@ -141,8 +138,6 @@ class Casino:
 
         raise ValueError("Scelta roulette non valida")
 
-=======
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
     def slot(self, theme: str, bet: float) -> dict:
         if theme not in self.SLOT_CONFIGS:
             raise ValueError("Slot non valida")
@@ -170,7 +165,7 @@ class Casino:
             message,
         )
 
-<<<<<<< HEAD
+
     def _olympus_slot(self, bet: float) -> dict:
         config = self.SLOT_CONFIGS["olympus"]
         rows = config["rows"]
@@ -322,8 +317,6 @@ class Casino:
             aces -= 1
         return score
 
-=======
->>>>>>> parent of 9e4b7c2 (Aggiungi Olympus blackjack e animazioni)
     def ice_fishing(self, bet: float, choice: str) -> dict:
         """Crazy Time inspired wheel with number slices and bonus rounds."""
         choice = choice.lower().strip()
