@@ -2144,6 +2144,7 @@ class IceSpecialEffect extends StatelessWidget {
         icon = Icons.phishing_rounded;
         title = 'ICE BONUS';
     }
+    final bonusData = bonus;
     return Transform.scale(
       scale: 1 + math.sin(progress * math.pi * 2).abs() * 0.08,
       child: Container(
@@ -2161,9 +2162,9 @@ class IceSpecialEffect extends StatelessWidget {
             Icon(icon, color: primary, size: 58),
             const SizedBox(height: 8),
             Text(title, style: const TextStyle(color: primary, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
-            if (bonus != null) ...[
+            if (bonusData != null) ...[
               const SizedBox(height: 6),
-              Text('${bonus['multiplier']}x', style: const TextStyle(color: primary, fontSize: 38, fontWeight: FontWeight.w900)),
+              Text('${bonusData['multiplier']}x', style: const TextStyle(color: primary, fontSize: 38, fontWeight: FontWeight.w900)),
             ],
           ],
         ),
