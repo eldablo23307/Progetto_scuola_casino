@@ -294,7 +294,7 @@ class AuthScaffold extends StatelessWidget {
                     subtitle,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: accent.withValues(alpha: 0.82),
+                      color: accent.withOpacity(0.82),
                       fontSize: 16,
                     ),
                   ),
@@ -545,7 +545,7 @@ class _RegisterFormState extends State<RegisterForm> {
           title: const Text('Account simulato'),
           subtitle: Text(
             'Saldo demo da 5000 crediti',
-            style: TextStyle(color: accent.withValues(alpha: 0.75)),
+            style: TextStyle(color: accent.withOpacity(0.75)),
           ),
           value: isSimulatedAccount,
           onChanged: (value) {
@@ -592,12 +592,12 @@ class AuthCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: accent.withValues(alpha: 0.22)),
+        border: Border.all(color: accent.withOpacity(0.22)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
+            color: Colors.black.withOpacity(0.25),
             blurRadius: 32,
             offset: const Offset(0, 18),
           ),
@@ -634,12 +634,12 @@ class StyledTextField extends StatelessWidget {
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: accent),
         hintText: hintText,
-        hintStyle: TextStyle(color: accent.withValues(alpha: 0.72)),
+        hintStyle: TextStyle(color: accent.withOpacity(0.72)),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.08),
+        fillColor: Colors.white.withOpacity(0.08),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: accent.withValues(alpha: 0.28)),
+          borderSide: BorderSide(color: accent.withOpacity(0.28)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
@@ -762,7 +762,7 @@ class _MainAppState extends State<MainApp> {
                 return Center(
                   child: Text(
                     'Sessione non valida',
-                    style: TextStyle(color: accent.withValues(alpha: 0.9)),
+                    style: TextStyle(color: accent.withOpacity(0.9)),
                   ),
                 );
               }
@@ -833,18 +833,18 @@ class Dashboard extends StatelessWidget {
             borderRadius: BorderRadius.circular(32),
             gradient: LinearGradient(
               colors: [
-                accent.withValues(alpha: 0.22),
-                Colors.white.withValues(alpha: 0.08),
+                accent.withOpacity(0.22),
+                Colors.white.withOpacity(0.08),
               ],
             ),
-            border: Border.all(color: accent.withValues(alpha: 0.26)),
+            border: Border.all(color: accent.withOpacity(0.26)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Bentornato,',
-                style: TextStyle(color: accent.withValues(alpha: 0.82), fontSize: 16),
+                style: TextStyle(color: accent.withOpacity(0.82), fontSize: 16),
               ),
               const SizedBox(height: 6),
               Text(
@@ -879,7 +879,7 @@ class Dashboard extends StatelessWidget {
         Text(
           'Giochi disponibili',
           style: TextStyle(
-            color: accent.withValues(alpha: 0.86),
+            color: accent.withOpacity(0.86),
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -923,9 +923,9 @@ class InfoPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: primary.withValues(alpha: 0.5),
+        color: primary.withOpacity(0.5),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: accent.withValues(alpha: 0.22)),
+        border: Border.all(color: accent.withOpacity(0.22)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -935,7 +935,7 @@ class InfoPill extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: TextStyle(color: accent.withValues(alpha: 0.72))),
+              Text(label, style: TextStyle(color: accent.withOpacity(0.72))),
               Text(
                 value,
                 style: const TextStyle(
@@ -970,7 +970,7 @@ class BrandLogo extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: gold.withValues(alpha: 0.24),
+            color: gold.withOpacity(0.24),
             blurRadius: size * 0.36,
             offset: Offset(0, size * 0.12),
           ),
@@ -982,8 +982,8 @@ class BrandLogo extends StatelessWidget {
           height: size * 0.72,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: primary.withValues(alpha: 0.88),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.42), width: 1.2),
+            color: primary.withOpacity(0.88),
+            border: Border.all(color: Colors.white.withOpacity(0.42), width: 1.2),
           ),
           child: Stack(
             alignment: Alignment.center,
@@ -1038,15 +1038,15 @@ class GameCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            game.colors.first.withValues(alpha: 0.82),
-            game.colors.last.withValues(alpha: 0.54),
-            Colors.white.withValues(alpha: 0.08),
+            game.colors.first.withOpacity(0.82),
+            game.colors.last.withOpacity(0.54),
+            Colors.white.withOpacity(0.08),
           ],
         ),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+        border: Border.all(color: Colors.white.withOpacity(0.16)),
         boxShadow: [
           BoxShadow(
-            color: game.colors.first.withValues(alpha: 0.18),
+            color: game.colors.first.withOpacity(0.18),
             blurRadius: 28,
             offset: const Offset(0, 16),
           ),
@@ -1070,9 +1070,9 @@ class GameCard extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      primary.withValues(alpha: 0.18),
-                      game.colors.last.withValues(alpha: 0.42),
-                      primary.withValues(alpha: 0.78),
+                      primary.withOpacity(0.18),
+                      game.colors.last.withOpacity(0.42),
+                      primary.withOpacity(0.78),
                     ],
                   ),
                 ),
@@ -1089,7 +1089,7 @@ class GameCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.58),
+                      color: primary.withOpacity(0.58),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Icon(game.icon, color: gold, size: 24),
@@ -1107,7 +1107,7 @@ class GameCard extends StatelessWidget {
                   Text(
                     game.subtitle,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.82),
+                      color: Colors.white.withOpacity(0.82),
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1278,7 +1278,7 @@ class _GamePlayPageState extends State<GamePlayPage> with SingleTickerProviderSt
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [primary, widget.game.colors.last.withValues(alpha: 0.74)],
+              colors: [primary, widget.game.colors.last.withOpacity(0.74)],
             ),
           ),
           child: SafeArea(
@@ -1378,8 +1378,8 @@ class GameHeroPanel extends StatelessWidget {
       height: 620,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(34),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
-        boxShadow: [BoxShadow(color: game.colors.first.withValues(alpha: 0.22), blurRadius: 36)],
+        border: Border.all(color: Colors.white.withOpacity(0.18)),
+        boxShadow: [BoxShadow(color: game.colors.first.withOpacity(0.22), blurRadius: 36)],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(34),
@@ -1398,7 +1398,7 @@ class GameHeroPanel extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.black.withValues(alpha: 0.18), primary.withValues(alpha: 0.9)],
+                    colors: [Colors.black.withOpacity(0.18), primary.withOpacity(0.9)],
                   ),
                 ),
               ),
@@ -1430,7 +1430,7 @@ class GameHeroPanel extends StatelessWidget {
                 children: [
                   Text(
                     game.subtitle,
-                    style: TextStyle(color: accent.withValues(alpha: 0.86), fontSize: 16, fontWeight: FontWeight.w700),
+                    style: TextStyle(color: accent.withOpacity(0.86), fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -1546,9 +1546,9 @@ class OutcomeCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: primary.withValues(alpha: 0.56),
+        color: primary.withOpacity(0.56),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: (positive ? gold : Colors.redAccent).withValues(alpha: 0.42)),
+        border: Border.all(color: (positive ? gold : Colors.redAccent).withOpacity(0.42)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1565,7 +1565,7 @@ class OutcomeCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Text(_details(outcome.result), style: TextStyle(color: accent.withValues(alpha: 0.82))),
+          Text(_details(outcome.result), style: TextStyle(color: accent.withOpacity(0.82))),
         ],
       ),
     );
@@ -1609,13 +1609,13 @@ class MiniStat extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(color: accent.withValues(alpha: 0.72), fontSize: 12)),
+          Text(label, style: TextStyle(color: accent.withOpacity(0.72), fontSize: 12)),
           Text(value, style: TextStyle(color: highlight ? gold : Colors.white, fontWeight: FontWeight.w900)),
         ],
       ),
@@ -1656,8 +1656,8 @@ class IceWheel extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   boxShadow: [
-                    BoxShadow(color: const Color(0xFF67E8F9).withValues(alpha: 0.34), blurRadius: 36, spreadRadius: 4),
-                    BoxShadow(color: gold.withValues(alpha: 0.18), blurRadius: 56, spreadRadius: 10),
+                    BoxShadow(color: const Color(0xFF67E8F9).withOpacity(0.34), blurRadius: 36, spreadRadius: 4),
+                    BoxShadow(color: gold.withOpacity(0.18), blurRadius: 56, spreadRadius: 10),
                   ],
                 ),
               ),
@@ -1673,9 +1673,9 @@ class IceWheel extends StatelessWidget {
                 height: 86,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: primary.withValues(alpha: 0.92),
+                  color: primary.withOpacity(0.92),
                   border: Border.all(color: gold, width: 4),
-                  boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.38), blurRadius: 22)],
+                  boxShadow: [BoxShadow(color: gold.withOpacity(0.38), blurRadius: 22)],
                 ),
                 child: const Icon(Icons.ac_unit_rounded, color: gold, size: 42),
               ),
@@ -1723,7 +1723,7 @@ class IceWheelPainter extends CustomPainter {
 
     for (var i = 0; i < labels.length; i++) {
       final selected = keys[i] == selectedSegment;
-      final paint = Paint()..color = colors[i].withValues(alpha: selected ? 1 : 0.88);
+      final paint = Paint()..color = colors[i].withOpacity(selected ? 1 : 0.88);
       canvas.drawArc(rect, -math.pi / 2 + (i * sweep), sweep, true, paint);
       canvas.drawArc(
         rect.deflate(4),
@@ -1733,7 +1733,7 @@ class IceWheelPainter extends CustomPainter {
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = selected ? 5 : 2
-          ..color = Colors.white.withValues(alpha: selected ? 0.95 : 0.34),
+          ..color = Colors.white.withOpacity(selected ? 0.95 : 0.34),
       );
       final labelAngle = -math.pi / 2 + (i * sweep) + sweep / 2;
       final labelOffset = Offset(center.dx + math.cos(labelAngle) * radius * 0.64, center.dy + math.sin(labelAngle) * radius * 0.64);
@@ -1750,8 +1750,8 @@ class IceWheelPainter extends CustomPainter {
       textPainter.paint(canvas, labelOffset - Offset(textPainter.width / 2, textPainter.height / 2));
     }
 
-    canvas.drawCircle(center, radius - 2, Paint()..style = PaintingStyle.stroke..strokeWidth = 5..color = Colors.white.withValues(alpha: 0.82));
-    canvas.drawCircle(center, radius - 18, Paint()..style = PaintingStyle.stroke..strokeWidth = 2..color = primary.withValues(alpha: 0.48));
+    canvas.drawCircle(center, radius - 2, Paint()..style = PaintingStyle.stroke..strokeWidth = 5..color = Colors.white.withOpacity(0.82));
+    canvas.drawCircle(center, radius - 18, Paint()..style = PaintingStyle.stroke..strokeWidth = 2..color = primary.withOpacity(0.48));
   }
 
   @override
@@ -1904,8 +1904,8 @@ class AnimatedRouletteStage extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         boxShadow: [
-                          BoxShadow(color: gold.withValues(alpha: 0.28), blurRadius: 46, spreadRadius: 4),
-                          BoxShadow(color: Colors.black.withValues(alpha: 0.48), blurRadius: 30, offset: const Offset(0, 18)),
+                          BoxShadow(color: gold.withOpacity(0.28), blurRadius: 46, spreadRadius: 4),
+                          BoxShadow(color: Colors.black.withOpacity(0.48), blurRadius: 30, offset: const Offset(0, 18)),
                         ],
                       ),
                     ),
@@ -1922,7 +1922,7 @@ class AnimatedRouletteStage extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
-                          boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.95), blurRadius: 18, spreadRadius: 2)],
+                          boxShadow: [BoxShadow(color: Colors.white.withOpacity(0.95), blurRadius: 18, spreadRadius: 2)],
                         ),
                       ),
                     ),
@@ -1986,7 +1986,7 @@ class RouletteWheelPainter extends CustomPainter {
       final color = number == 0 ? const Color(0xFF16A34A) : europeanRouletteRedNumbers.contains(number) ? const Color(0xFFDC2626) : const Color(0xFF111827);
       final start = -math.pi / 2 + (i * sweep) - (sweep / 2);
       canvas.drawArc(rect, start, sweep, true, Paint()..color = color);
-      canvas.drawArc(rect.deflate(2), start, sweep, true, Paint()..style = PaintingStyle.stroke..strokeWidth = 1.2..color = Colors.white.withValues(alpha: 0.55));
+      canvas.drawArc(rect.deflate(2), start, sweep, true, Paint()..style = PaintingStyle.stroke..strokeWidth = 1.2..color = Colors.white.withOpacity(0.55));
 
       final labelAngle = -math.pi / 2 + (i * sweep);
       final labelOffset = Offset(center.dx + math.cos(labelAngle) * radius * 0.82, center.dy + math.sin(labelAngle) * radius * 0.82);
@@ -2055,7 +2055,7 @@ class AnimatedIceFishingStage extends StatelessWidget {
                 top: ((progress * (isPlaying ? 280 : 95)) + i * 31) % 620,
                 child: Transform.rotate(
                   angle: progress * math.pi * 2 + i,
-                  child: Icon(Icons.ac_unit_rounded, color: Colors.white.withValues(alpha: 0.22 + (i % 4) * 0.06), size: 14 + (i % 5) * 4),
+                  child: Icon(Icons.ac_unit_rounded, color: Colors.white.withOpacity(0.22 + (i % 4) * 0.06), size: 14 + (i % 5) * 4),
                 ),
               ),
             Positioned(
@@ -2069,18 +2069,18 @@ class AnimatedIceFishingStage extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: const Color(0xFF92400E),
                     borderRadius: BorderRadius.circular(99),
-                    boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.38), blurRadius: 18)],
+                    boxShadow: [BoxShadow(color: gold.withOpacity(0.38), blurRadius: 18)],
                   ),
                 ),
               ),
             ),
-            Positioned(left: 138, top: 166 + (bob * 0.58), child: Container(width: 2, height: 130, color: Colors.white.withValues(alpha: 0.76))),
+            Positioned(left: 138, top: 166 + (bob * 0.58), child: Container(width: 2, height: 130, color: Colors.white.withOpacity(0.76))),
             Positioned(
               left: 92,
               top: 286 + (bob * 0.28),
               child: Transform.scale(
                 scale: 1 + math.sin(progress * math.pi * 2).abs() * (isPlaying ? 0.18 : 0.08),
-                child: Icon(Icons.set_meal_rounded, color: const Color(0xFF67E8F9).withValues(alpha: 0.98), size: 88),
+                child: Icon(Icons.set_meal_rounded, color: const Color(0xFF67E8F9).withOpacity(0.98), size: 88),
               ),
             ),
             Positioned(
@@ -2090,10 +2090,10 @@ class AnimatedIceFishingStage extends StatelessWidget {
               child: Container(
                 height: 110,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.18),
+                  color: Colors.white.withOpacity(0.18),
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.28), width: 2),
-                  boxShadow: [BoxShadow(color: const Color(0xFF67E8F9).withValues(alpha: 0.22), blurRadius: 28)],
+                  border: Border.all(color: Colors.white.withOpacity(0.28), width: 2),
+                  boxShadow: [BoxShadow(color: const Color(0xFF67E8F9).withOpacity(0.22), blurRadius: 28)],
                 ),
               ),
             ),
@@ -2150,10 +2150,10 @@ class IceSpecialEffect extends StatelessWidget {
         width: 220,
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [gold.withValues(alpha: 0.96), const Color(0xFF67E8F9).withValues(alpha: 0.9)]),
+          gradient: LinearGradient(colors: [gold.withOpacity(0.96), const Color(0xFF67E8F9).withOpacity(0.9)]),
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.82), width: 3),
-          boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.42), blurRadius: 36, spreadRadius: 4)],
+          border: Border.all(color: Colors.white.withOpacity(0.82), width: 3),
+          boxShadow: [BoxShadow(color: gold.withOpacity(0.42), blurRadius: 36, spreadRadius: 4)],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -2593,7 +2593,7 @@ class CasinoParticlePainter extends CustomPainter {
       final y = ((i * 67.0) % height) + wave * (intense ? 28 : 12);
       final radius = intense ? 2.5 + (i % 5) * 1.3 : 1.8 + (i % 3);
       final alpha = intense ? 0.18 + (i % 4) * 0.08 : 0.12 + (i % 3) * 0.05;
-      canvas.drawCircle(Offset(x, y % height), radius, Paint()..color = color.withValues(alpha: alpha));
+      canvas.drawCircle(Offset(x, y % height), radius, Paint()..color = color.withOpacity(alpha));
     }
   }
 
@@ -2616,16 +2616,16 @@ class ResultSpotlight extends StatelessWidget {
       constraints: const BoxConstraints(maxWidth: 280),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: primary.withValues(alpha: 0.84),
+        color: primary.withOpacity(0.84),
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: color.withValues(alpha: 0.76), width: 3),
-        boxShadow: [BoxShadow(color: color.withValues(alpha: 0.34), blurRadius: 34, spreadRadius: 3)],
+        border: Border.all(color: color.withOpacity(0.76), width: 3),
+        boxShadow: [BoxShadow(color: color.withOpacity(0.34), blurRadius: 34, spreadRadius: 3)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(title.toUpperCase(), style: TextStyle(color: accent.withValues(alpha: 0.92), fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.4)),
+          Text(title.toUpperCase(), style: TextStyle(color: accent.withOpacity(0.92), fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.4)),
           const SizedBox(height: 6),
           Text(value, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
         ],
@@ -2645,10 +2645,10 @@ class ResultBadge extends StatelessWidget {
       width: 82,
       height: 82,
       decoration: BoxDecoration(
-        color: primary.withValues(alpha: 0.9),
+        color: primary.withOpacity(0.9),
         shape: BoxShape.circle,
         border: Border.all(color: gold, width: 4),
-        boxShadow: [BoxShadow(color: gold.withValues(alpha: 0.42), blurRadius: 24)],
+        boxShadow: [BoxShadow(color: gold.withOpacity(0.42), blurRadius: 24)],
       ),
       child: Center(
         child: Text(
@@ -2755,7 +2755,7 @@ class RouletteArtwork extends StatelessWidget {
             height: 168,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: primary.withValues(alpha: 0.72),
+              color: primary.withOpacity(0.72),
               border: Border.all(color: gold, width: 10),
             ),
             child: Center(
@@ -2764,8 +2764,8 @@ class RouletteArtwork extends StatelessWidget {
                 height: 94,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFFE53935).withValues(alpha: 0.92),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.74), width: 8),
+                  color: const Color(0xFFE53935).withOpacity(0.92),
+                  border: Border.all(color: Colors.white.withOpacity(0.74), width: 8),
                 ),
                 child: Center(
                   child: Container(
@@ -2792,7 +2792,7 @@ class RouletteArtwork extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: index.isEven ? Colors.redAccent : Colors.black87,
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.34)),
+                  border: Border.all(color: Colors.white.withOpacity(0.34)),
                 ),
               ),
             ),
@@ -2818,8 +2818,8 @@ class IceFishingArtwork extends StatelessWidget {
             height: 112,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.22),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 8),
+              color: Colors.white.withOpacity(0.22),
+              border: Border.all(color: Colors.white.withOpacity(0.5), width: 8),
             ),
             child: const Center(
               child: Icon(Icons.water_rounded, color: Color(0xFF1D4ED8), size: 58),
@@ -2844,12 +2844,12 @@ class IceFishingArtwork extends StatelessWidget {
         Positioned(
           left: 94,
           top: 38,
-          child: Container(width: 2, height: 72, color: Colors.white.withValues(alpha: 0.82)),
+          child: Container(width: 2, height: 72, color: Colors.white.withOpacity(0.82)),
         ),
         Positioned(
           left: 62,
           top: 116,
-          child: Icon(Icons.set_meal_rounded, color: gold.withValues(alpha: 0.92), size: 58),
+          child: Icon(Icons.set_meal_rounded, color: gold.withOpacity(0.92), size: 58),
         ),
         Positioned(
           left: -22,
@@ -2858,7 +2858,7 @@ class IceFishingArtwork extends StatelessWidget {
             width: 180,
             height: 34,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.24),
+              color: Colors.white.withOpacity(0.24),
               borderRadius: BorderRadius.circular(99),
             ),
           ),
@@ -2891,11 +2891,11 @@ class SlotArtwork extends StatelessWidget {
             width: 132,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: panelColor.withValues(alpha: 0.88),
+              color: panelColor.withOpacity(0.88),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: glowColor.withValues(alpha: 0.76), width: 3),
+              border: Border.all(color: glowColor.withOpacity(0.76), width: 3),
               boxShadow: [
-                BoxShadow(color: glowColor.withValues(alpha: 0.22), blurRadius: 30),
+                BoxShadow(color: glowColor.withOpacity(0.22), blurRadius: 30),
               ],
             ),
             child: Row(
@@ -2907,7 +2907,7 @@ class SlotArtwork extends StatelessWidget {
                         height: 88,
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.92),
+                          color: Colors.white.withOpacity(0.92),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Center(
@@ -2942,7 +2942,7 @@ class SlotArtwork extends StatelessWidget {
         Positioned(
           left: 24,
           top: 26,
-          child: Icon(Icons.auto_awesome_rounded, color: glowColor.withValues(alpha: 0.9), size: 42),
+          child: Icon(Icons.auto_awesome_rounded, color: glowColor.withOpacity(0.9), size: 42),
         ),
       ],
     );
