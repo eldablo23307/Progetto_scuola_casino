@@ -21,7 +21,7 @@ Gli utenti possono registrarsi, effettuare il login, visualizzare il proprio bil
 - **account simulato**, con saldo iniziale virtuale di `5000` e indirizzo wallet generato automaticamente se non viene fornito;
 - **account non simulato**, con saldo iniziale `0` e indirizzo wallet inserito dall'utente.
 
-Dopo l'accesso l'utente può giocare a Roulette, Ice Fishing e tre slot machine tematiche. Ogni giocata invia al backend l'ID giocatore, la puntata e, quando necessario, la scelta dell'utente. Il backend controlla il saldo, calcola il risultato, aggiorna il bilancio nel database e restituisce il nuovo stato al frontend.
+Dopo l'accesso l'utente può giocare a Roulette, Ice Fishing e quattro slot machine tematiche e Blackjack. Ogni giocata invia al backend l'ID giocatore, la puntata e, quando necessario, la scelta dell'utente. Il backend controlla il saldo, calcola il risultato, aggiorna il bilancio nel database e restituisce il nuovo stato al frontend.
 
 > Il progetto è una simulazione didattica: i fondi non sono reali e non sono scambiabili.
 
@@ -101,7 +101,9 @@ Lo script inserisce anche i giochi iniziali disponibili nella dashboard:
 - `Ice Fishing`, categoria `Arcade`;
 - `Slot Frutta`, categoria `Slot`;
 - `Slot Cristalli`, categoria `Slot`;
-- `Slot Fulmini`, categoria `Slot`.
+- `Slot Fulmini`, categoria `Slot`;
+- `Gate of Olympus`, categoria `Slot`;
+- `Blackjack`, categoria `Tavolo`.
 
 ## Backend
 
@@ -248,7 +250,8 @@ Temi disponibili:
 
 - `fruit`, per `Slot Frutta`;
 - `crystal`, per `Slot Cristalli`;
-- `thunder`, per `Slot Fulmini`.
+- `thunder`, per `Slot Fulmini`;
+- `olympus`, per `Gate of Olympus`, slot a griglia con eventi, scatter, wild, cascate e moltiplicatori.
 
 Body JSON richiesto:
 
@@ -259,7 +262,28 @@ Body JSON richiesto:
 }
 ```
 
-Le slot estraggono tre simboli casuali. Le vincite dipendono da coppie, tris e jackpot, con moltiplicatori differenti in base al tema.
+Le slot classiche estraggono tre simboli casuali. Le vincite dipendono da coppie, tris e jackpot, con moltiplicatori differenti in base al tema. `Gate of Olympus` usa invece una griglia `3x5`, possibili eventi multipli, scatter, wild, cascate e animazioni di vincita diverse in base al livello della vincita.
+
+#### `POST /games/blackjack/play`
+
+Esegue una mano rapida di Blackjack contro il banco.
+
+Body JSON richiesto:
+
+```json
+{
+  "id_giocatore": 1,
+  "bet": 50,
+  "choice": "hit"
+}
+```
+
+Scelte valide:
+
+- `stand`, per stare con le carte iniziali;
+- `hit`, per chiedere una carta prima del turno del banco.
+
+Il banco pesca fino ad almeno `17`. La risposta include mano giocatore, mano banco, punteggi, esito e moltiplicatore.
 
 #### Risposta delle API di gioco
 
@@ -317,13 +341,13 @@ Oltre alle rotte principali, l'apertura di un gioco avviene tramite una pagina F
 - Dashboard con nome utente, ID giocatore e bilancio in crediti.
 - Griglia responsive dei giochi disponibili.
 - Carte gioco con immagini, colori, icone e descrizioni.
-- Pagine di giocata dedicate per Roulette, Ice Fishing e slot.
+- Pagine di giocata dedicate per Roulette, Ice Fishing, slot e Blackjack.
 - Campo puntata con validazione lato frontend.
 - Selettore della scelta quando il gioco lo richiede.
 - Chiamata al backend per eseguire la giocata.
 - Aggiornamento del bilancio dopo ogni giocata riuscita.
 - Visualizzazione di payout, profitto, messaggio e dettagli del risultato.
-- Animazioni grafiche per roulette, ruota Ice Fishing, slot e particelle.
+- Animazioni grafiche più vivaci per roulette, ruota Ice Fishing, slot, Gate of Olympus, Blackjack, effetti particellari e badge di vincita.
 - Logout con ritorno alla schermata di login.
 
 ### Giochi disponibili nel frontend
@@ -333,6 +357,8 @@ Oltre alle rotte principali, l'apertura di un gioco avviene tramite una pagina F
 - **Slot Frutta**: slot con simboli frutta e jackpot.
 - **Slot Cristalli**: slot con gemme e moltiplicatori più alti.
 - **Slot Fulmini**: slot ad alta volatilità con moltiplicatori maggiori.
+- **Gate of Olympus**: slot ispirata alle slot a griglia con eventi multipli, cascate, scatter, wild e vincite animate per livello.
+- **Blackjack**: mano rapida contro il banco con scelta tra stare o chiedere carta.
 
 ### Endpoint usati dal frontend
 
@@ -346,6 +372,8 @@ Il frontend invia le richieste a:
 - `http://127.0.0.1:5000/games/slots/fruit/play`
 - `http://127.0.0.1:5000/games/slots/crystal/play`
 - `http://127.0.0.1:5000/games/slots/thunder/play`
+- `http://127.0.0.1:5000/games/slots/olympus/play`
+- `http://127.0.0.1:5000/games/blackjack/play`
 
 Se si esegue l'app da un dispositivo fisico, da un emulatore o da un container, potrebbe essere necessario sostituire `127.0.0.1` con l'indirizzo IP della macchina che esegue il backend.
 
@@ -416,14 +444,14 @@ Funzionalità già presenti nel codice:
 - database relazionale MySQL con utenti, giochi, bonus, movimenti e bilanci account;
 - popolamento iniziale della tabella `Giochi`;
 - API Flask per login, registrazione, recupero dati utente e recupero dei giochi;
-- API Flask per eseguire giocate su Roulette, Ice Fishing e slot;
+- API Flask per eseguire giocate su Roulette, Ice Fishing, slot e Blackjack;
 - supporto CORS nel backend;
 - motore casinò separato dal database in `Casino_Handler.py`;
 - validazione backend di puntata, saldo, giocatore e scelta del gioco;
 - aggiornamento del bilancio dopo ogni giocata;
 - interfaccia Flutter con login, registrazione e schermata principale;
 - dashboard Flutter con bilancio aggiornato, ID giocatore e griglia dei giochi;
-- pagine Flutter dedicate alle giocate con animazioni e riepilogo risultato;
+- pagine Flutter dedicate alle giocate con animazioni più vivaci, ruota Ice Fishing allineata al risultato, animazioni slot migliorate, Gate of Olympus e riepilogo risultato;
 - creazione automatica del bilancio account durante la registrazione;
 - test Flutter per login e lista giochi.
 
